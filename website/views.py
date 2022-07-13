@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, render_template, request, flash, jsonify, 
 from flask_login import login_required, current_user
 from sqlalchemy import null, func
 from .models import Note, Player, Alias, Game, Payment, Url
-from app import db
+from . import db
 import json, requests, csv
 
 
