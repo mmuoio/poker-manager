@@ -14,6 +14,7 @@ class Player(db.Model):
 	name = db.Column(db.String(150), unique=True)
 	venmo = db.Column(db.String(300))
 	email = db.Column(db.String(300))
+	games_player = db.Column(db.Integer, default=0)
 	aliases = db.relationship('Alias', backref='player')
 
 class Alias(db.Model):
