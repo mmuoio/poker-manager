@@ -136,7 +136,7 @@ def import_game():
 			game_urls.append(data.get('game_url2'))
 		if len(data.get('game_url3')) > 0:
 			game_urls.append(data.get('game_url3'))
-		new_game = NULL
+		new_game = False
 		if len(game_urls) > 0:
 			if len(game_urls[0]) == 0:
 				flash("Please enter a valid URL.", category='error')
