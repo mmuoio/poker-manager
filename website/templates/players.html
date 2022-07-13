@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Players{% endblock %}
+
+{% block content %}
+<h1 align="center">Players</h1>
+<ul class="list-group list-group-flush" id="players">
+	{% if players %}
+	{% for player in players %}
+	<li class="list-group-item"><a href="{{url_for('views.edit_player', player_id=player.id)}}" ><strong>{{ player.name }}</strong></a> ({{ player.venmo }})
+		
+
+		
+
+		<!--<a class="close float-end" href="{{url_for('views.edit_player', player_id=player.id)}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>-->
+		<br/>
+		<div class="aliases"><em>
+			{% for alias in player.aliases %}
+			<span class="badge rounded-pill bg-secondary">{{ alias.alias }}</span>
+			{% endfor %}
+		</em></div>
+	</li>
+	{% endfor %}
+	{% endif %}
+
+	
+</ul>
+
+
+
+<br/>
+<form method="POST">
+	<div class="form-control mb-3">
+	<label for="player_name" class="form-label">Player Name</label>
+	<input type="text" name="player_name" id="player_name" class="form-control"></input>
+	<br/>
+	<label for="player_venmo" class="form-label">Venmo</label>
+	<input type="text" name="player_venmo" id="player_venmo" class="form-control"></input>
+	<br/>
+	<label for="player_alias" class="form-label">Alias</label>
+	<input type="text" name="player_alias" id="player_alas" class="form-control"></input>
+	<br/>
+	<div align="center">
+		<button type="submit" class="btn btn-primary">Add Player</button>
+	</div>
+	</div>
+</form>
+
+{% endblock %}

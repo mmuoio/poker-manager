@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Link Players{% endblock %}
+
+{% block content %}
+<h1 align="center">Link Players</h1>
+<br/>
+<div class="container">
+	<form method="POST">
+	<input type="hidden" name="whichForm" value="linkPlayers"/>
+	{% if ledger %}
+	{% for pn_player in ledger %}
+	<div class="row">
+	  <div class="col" style="text-align:right; padding-top: 7px; ">
+		{{', '.join(pn_player.player_nickname)}}
+	  </div>
+	  <div class="col">
+		<select name="player_link" class="form-select mb-2" >
+			<option value="-1">Select player</option>
+			{% if players %}
+			{% for player in players %}
+			<option value="{{player.id}}" {% if player.id == pn_player.player_id %}selected{% endif %}>{{player.name}}</option>
+			{% endfor %}
+			{% endif %}
+
+		</select>
+	  </div>
+	</div>
+	{% endfor %}
+	{% endif %}
+	<br/>
+	<div align="center">
+		<button type="submit" class="btn btn-primary" value="linkPlayers">Link Players</button>
+	</div>
+	</form>
+</div>
+<hr/>
+<h2 align="center">Add Player</h2>
+<form method="POST">
+	<input type="hidden" name="whichForm" value="addPlayer"/>
+	<div class="form-control mb-3">
+	<label for="player_name" class="form-label">Player Name</label>
+	<input type="text" name="player_name" id="player_name" class="form-control"></input>
+	<br/>
+	<label for="player_venmo" class="form-label">Venmo</label>
+	<input type="text" name="player_venmo" id="player_venmo" class="form-control"></input>
+	<br/>
+	<label for="player_alias" class="form-label">Alias</label>
+	<input type="text" name="player_alias" id="player_alas" class="form-control"></input>
+	<br/>
+	<div align="center">
+		<button type="submit" class="btn btn-primary" value="addPlayer">Add Player</button>
+	</div>
+	</div>
+</form>
+
+{% endblock %}

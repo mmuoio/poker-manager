@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Player Payments{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css"/>
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+<h1 align="center">Player Payments</h1>
+
+<br/>
+<table class="table table-striped table-hover table-bordered" id="payoutTable">
+	<thead>
+	  <tr>
+		<th scope="col" style="text-align:center">FROM</th>
+		<th scope="col" style="text-align:center">TO</th>
+		<th scope="col" style="text-align:center">AMOUNT</th>
+	  </tr>
+	</thead>
+	<tbody>
+		{% for payment in payments %}
+	  <tr>
+		<td>{% for player in players %}
+				{% if player['id'] == payment.payer %}
+				{{ player.name }}
+				{% endif %}
+			{% endfor %}
+			</td>
+		<td>{% for player in players %}
+			{% if player['id'] == payment.payee %}
+			{{ player.name }}
+			{% endif %}
+		{% endfor %}</td>
+		<td>${{ payment.amount }}</td>
+	  </tr>
+	  {% endfor %}
+	</tbody>
+  </table>
+
+  <script type="text/javascript">
+	$(document).ready(function () {
+		/*$('#payoutTable').DataTable({
+			paging: false
+		});*/
+	});
+  </script>
+
+{% endblock %}

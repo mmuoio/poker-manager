@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Import Game{% endblock %}
+
+{% block content %}
+<h1 align="center">Import Game</h1>
+	
+	<form method="POST">
+	<div class="form-control mb-3">
+	<label for="game_url" class="form-label">Game URL(s):</label>
+	<input type="text" name="game_url1" id="game_url" class="form-control"></input><br/>
+	<input type="text" name="game_url2" id="game_url" class="form-control" placeholder="(Optional)"></input><br/>
+	<input type="text" name="game_url3" id="game_url" class="form-control" placeholder="(Optional)"></input><br/>
+	
+	<div align="center">
+		<button type="submit" class="btn btn-primary">Load URL</button>
+	</div>
+	</div>
+</form>
+
+{% endblock %}
