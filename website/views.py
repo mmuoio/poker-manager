@@ -286,8 +286,7 @@ def link_players():
 				if alias:
 					debt['player_id'] = alias.player_id
 
-	#for player in PNDictionary:
-	#	print(player)
+	
 	print(PNDictionary)
 	players = Player.query.order_by(Player.name).all()
 	if not processLedger:
