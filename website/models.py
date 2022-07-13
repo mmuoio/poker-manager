@@ -13,6 +13,7 @@ class Player(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(150), unique=True)
 	venmo = db.Column(db.String(300))
+	email = db.Column(db.String(300))
 	aliases = db.relationship('Alias', backref='player')
 
 class Alias(db.Model):
