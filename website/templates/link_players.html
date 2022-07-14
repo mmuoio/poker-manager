@@ -18,7 +18,7 @@
 			<option value="-1">Select player</option>
 			{% if players %}
 			{% for player in players %}
-			<option value="{{player.id}}" {% if player.id == pn_player.player_id %}selected{% endif %}>{{player.name}}</option>
+			<option value="{{player.id}}" {% if player.id == pn_player.player_id or player.name in pn_player.player_nickname %}selected{% endif %}>{{player.name}}</option>
 			{% endfor %}
 			{% endif %}
 

@@ -368,7 +368,7 @@ def link_players():
 	while balance_remaining(debts):
 		settle(debts)
 
-	#game.settled = True
+	game.settled = True
 
 	#####################################
 	#ADD ANY UNUSED ALIASES
