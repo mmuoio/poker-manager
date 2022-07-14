@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Player Payments{% endblock %}
+{% block title %}Settlement{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css"/>
 <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 
-<h1 align="center">Player Payments</h1>
+<h1 align="center">Settlement</h1>
 
 <br/>
 <table class="table table-striped table-hover table-bordered" id="payoutTable">
@@ -13,6 +13,7 @@
 	  <tr>
 		<th scope="col" style="text-align:center">FROM</th>
 		<th scope="col" style="text-align:center">TO</th>
+		<th scope="col" style="text-align:center">VENMO</th>
 		<th scope="col" style="text-align:center">AMOUNT</th>
 	  </tr>
 	</thead>
@@ -25,12 +26,17 @@
 				{% endif %}
 			{% endfor %}
 			</td>
-		<td>{% for player in players %}
-			{% if player['id'] == payment.payee %}
-			{{ player.name }}
-			{% endif %}
-		{% endfor %}</td>
-		<td>${{ payment.amount }}</td>
+			<td>{% for player in players %}
+				{% if player['id'] == payment.payee %}
+				{{ player.name }}
+				{% endif %}
+			{% endfor %}</td>
+			<td>{% for player in players %}
+				{% if player['id'] == payment.payee %}
+				{{ player.venmo}}
+				{% endif %}
+			{% endfor %}</td>
+		<td align="center">${{ payment.amount }}</td>
 	  </tr>
 	  {% endfor %}
 	</tbody>
