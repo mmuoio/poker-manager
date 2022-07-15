@@ -1,4 +1,4 @@
 Sort games desc
 Sort players page alphabetically
-Option to delete games
 Set up dev/prod variable
+Add a check that amount paid out matches how much they put in
