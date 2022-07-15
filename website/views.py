@@ -355,9 +355,11 @@ def link_players():
 	#DOES MAGIC
 	#####################################
 	def settle(debts):
+		#Sort the ledger by balance
 		debtsDict = (sorted(debts, key = lambda i: i['balance']))
 		for debt in debtsDict:
 			if debt['balance'] < 0:
+				#if player still owes
 				for i in range(len(debtsDict)):
 					if debt['pn_player_id'] != debtsDict[-i]['pn_player_id']:
 						#print(debt['player_nickname'][0] + ' pays ' + debtsDict[-i]['player_nickname'][0] +' ' + str(debt['balance']))
@@ -445,7 +447,18 @@ def export_settlement():
 	
 
 
-def import_player_search(name, players):
-	for p in players:
-		if p['pn_id'] == name:
-			return True
+@views.route('/delete_game', methods=['GET'])
+def delete_game():
+	gameID = request.args.get('game_id')
+	game = Game.query.filter_by(id=gameID).first()
+	urls = Url.query.filter_by(game_id=gameID)
+	payments = Payment.query.filter_by(game_id=gameID)
+	for url in urls:
+		db.session.delete(url)
+	for payment in payments:
+		db.session.delete(payment)
+	if game:
+		db.session.delete(game)
+	db.session.commit()
+	games = Game.query.all()
+	return render_template("games.html", user=current_user, games=games)
