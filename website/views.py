@@ -438,7 +438,7 @@ def export_settlement():
 		payee = Player.query.filter_by(id=r.payee).first()
 		cw.writerows([(payer.name, payee.name, payee.venmo, r.amount)])
 	response = make_response(si.getvalue())
-	response.headers['Content-Disposition'] = 'attachment; filename=report.csv'
+	response.headers['Content-Disposition'] = 'attachment; filename=settlement.csv'
 	response.headers["Content-type"] = "text/csv"
 	response.headers["mimetype"] = "text/csv"
 	return response
