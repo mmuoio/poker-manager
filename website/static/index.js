@@ -16,3 +16,10 @@ function deleteAlias(aliasId, player_id){
 	});
 }
 
+ function exportSettlement(gameID){
+	//window.location.href = '/export_settlement?game_id='+gameID;
+	url = '/export_settlement?game_id='+gameID
+ 	fetch(url)
+	
+}
+

@@ -1,11 +1,12 @@
 #from asyncio.windows_events import NULL
-from flask import Blueprint, jsonify, render_template, request, flash, jsonify, redirect, url_for
+from flask import Blueprint, jsonify, render_template, request, flash, jsonify, redirect, url_for, make_response, Response
 from flask_login import login_required, current_user
 from sqlalchemy import null, func
 from .models import Player, Alias, Game, Payment, Url
 from . import db
 import json, requests, csv
-
+import csv
+from io import StringIO
 
 views = Blueprint('views', __name__)
 
@@ -246,8 +247,13 @@ def link_players():
 	#####################################
 	def findPlayerIndexByKey(PNDictionary, key, val):
 		for i, dic in enumerate(PNDictionary):
-			if val in dic[key]:
-				return i
+			#print(val, dic[key])
+			if isinstance(dic[key], list):
+				if val in dic[key]:
+					return i
+			else:
+				if val == dic[key]:
+					return i
 		return -1
 
 	#####################################
@@ -286,8 +292,10 @@ def link_players():
 				if alias:
 					debt['player_id'] = alias.player_id
 
+	#for x in PNDictionary:
+	#	print(x)
+	#print('break')
 	
-	print(PNDictionary)
 	players = Player.query.order_by(Player.name).all()
 	if not processLedger:
 		return render_template("link_players.html", user=current_user, players=players, ledger=PNDictionary)
@@ -298,6 +306,7 @@ def link_players():
 	finalLedger = []
 	for debt in PNDictionary:
 		playerIndex = findPlayerIndexByKey(finalLedger, 'player_id', debt['player_id'])
+		#print(debt['player_nickname'], debt['player_id'], playerIndex)
 		if playerIndex >= 0:
 			for eachID in debt['pn_player_id']:
 				if eachID not in finalLedger[playerIndex]['pn_player_id']:
@@ -351,8 +360,8 @@ def link_players():
 			if debt['balance'] < 0:
 				for i in range(len(debtsDict)):
 					if debt['pn_player_id'] != debtsDict[-i]['pn_player_id']:
-						print(debt['player_nickname'][0] + ' pays ' + debtsDict[-i]['player_nickname'][0] +' ' + str(debt['balance']))
-						print(abs(debt['balance']), game.id, debt['player_id'], debtsDict[-i]['player_id'])
+						#print(debt['player_nickname'][0] + ' pays ' + debtsDict[-i]['player_nickname'][0] +' ' + str(debt['balance']))
+						#print(abs(debt['balance']), game.id, debt['player_id'], debtsDict[-i]['player_id'])
 						new_payment = Payment(amount=abs(debt['balance']), game_id=game.id, payer=debt['player_id'], payee=debtsDict[-i]['player_id'])
 						db.session.add(new_payment)
 						debtsDict[-i]['balance'] = debtsDict[-i]['balance'] + debt['balance']
@@ -378,7 +387,6 @@ def link_players():
 			alias_lookup = Alias.query.filter_by(alias=alias).first()
 			if not alias_lookup:
 				#ADD TO ALIAS TABLE
-				print(alias)
 				new_alias = Alias(alias=alias, player_id=debt['player_id'])
 				db.session.add(new_alias)
 
@@ -386,13 +394,14 @@ def link_players():
 	db.session.commit()
 	
 	
-	for debt in debts:
-		print(debt)
+	#for debt in debts:
+	#	print(debt)
 	
 	###REDIRECT TO DISPLAY PAGE
 
 
 	
+	#return render_template("link_players.html", user=current_user, players=players, ledger=PNDictionary)
 	return redirect(url_for('views.payout', game_id=game.id))
 
 @views.route('/payout', methods=['GET', 'POST'])
@@ -404,16 +413,36 @@ def payout():
 			flash('Game not found.', category='error')
 	payments = Payment.query.filter_by(game_id=game_id)
 	players = Player.query.all()
-	print(payments)
-	print(players)
-	return render_template("payout.html", user=current_user, payments=payments, players=players)
+	#print(payments)
+	#print(players)
+	return render_template("payout.html", user=current_user, payments=payments, players=players, game_id=game_id)
 
 @views.route('/games', methods=['GET','POST'])
 def games():
 	games = Game.query.all()
 	return render_template("games.html", user=current_user, games=games)
 
+@views.route('/export_settlement', methods=['GET','POST'])
+def export_settlement():
+	game_id = request.args.get('game_id')
 
+	si = StringIO()
+	cw = csv.writer(si)
+	records = Payment.query.filter_by(game_id=game_id)
+	
+	
+	# any table method that extracts an iterable will work
+	cw.writerows([('From','To','Venmo','Amount')])
+	for r in records:
+		payer = Player.query.filter_by(id=r.payer).first()
+		payee = Player.query.filter_by(id=r.payee).first()
+		cw.writerows([(payer.name, payee.name, payee.venmo, r.amount)])
+	response = make_response(si.getvalue())
+	response.headers['Content-Disposition'] = 'attachment; filename=report.csv'
+	response.headers["Content-type"] = "text/csv"
+	response.headers["mimetype"] = "text/csv"
+	return response
+	
 
 
 def import_player_search(name, players):
