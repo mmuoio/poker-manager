@@ -424,13 +424,14 @@ def payout():
 	#print(players)
 
 	new_earnings = []
-	for earning in earnings:
-		if earning.net < 0:
-			net = '-$' + str(abs(earning.net))
-		else:
-			net = '$' + str(earning.net)
+	if earnings:
+		for earning in earnings:
+			if earning.net < 0:
+				net = '-$' + str(abs(earning.net))
+			else:
+				net = '$' + str(earning.net)
 
-		new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
+			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
 	return render_template("payout.html", user=current_user, payments=payments, players=players, game_id=game_id, earnings=new_earnings)
 
 
