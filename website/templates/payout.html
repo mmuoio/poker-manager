@@ -11,6 +11,7 @@
 <a type="button" class="btn btn-primary float-end" href="/export_settlement?game_id={{game_id}}">Export CSV</a>
 		<br/><br/>
 <div class="row">
+	{% if earnings %}
 	<div class="col-5">
 		<table class="table table-striped table-hover table-bordered" id="payoutTable">
 			<thead>
@@ -36,6 +37,10 @@
 		</table>
 	</div>
 	<div class="col-7">
+	{% else %}
+	<div class="col-12">
+	{% endif %}
+
 		
 		<table class="table table-striped table-hover table-bordered" id="payoutTable">
 			<thead>
