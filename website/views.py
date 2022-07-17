@@ -7,8 +7,6 @@ from . import db
 import json, requests, csv
 import csv
 from io import StringIO
-import locale
-from math import floor
 
 views = Blueprint('views', __name__)
 
@@ -424,8 +422,6 @@ def payout():
 	players = Player.query.all()
 	#print(payments)
 	#print(players)
-	locale.setlocale( locale.LC_ALL, 'English_United States.1252' )
-	locale._override_localeconv = {'n_sign_posn':1}
 
 	new_earnings = []
 	for earning in earnings:
