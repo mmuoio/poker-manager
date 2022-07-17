@@ -1,12 +1,14 @@
 #from asyncio.windows_events import NULL
 from flask import Blueprint, jsonify, render_template, request, flash, jsonify, redirect, url_for, make_response, Response
 from flask_login import login_required, current_user
-from sqlalchemy import null, func
-from .models import Player, Alias, Game, Payment, Url
+from sqlalchemy import null, func, asc, desc
+from .models import Player, Alias, Game, Payment, Url, Earning
 from . import db
 import json, requests, csv
 import csv
 from io import StringIO
+import locale
+from math import floor
 
 views = Blueprint('views', __name__)
 
@@ -378,6 +380,10 @@ def link_players():
 	debts = (sorted(finalLedger, key = lambda i: i['net']))
 	while balance_remaining(debts):
 		settle(debts)
+	
+	for debt in debts:
+		new_earning = Earning(net=debt['net'],player_id=debt['player_id'],game_id=game.id)
+		db.session.add(new_earning)
 
 	game.settled = True
 
@@ -414,15 +420,29 @@ def payout():
 		if len(game_id) < 1:
 			flash('Game not found.', category='error')
 	payments = Payment.query.filter_by(game_id=game_id)
+	earnings = Earning.query.order_by(Earning.net.desc()).filter_by(game_id=game_id)
 	players = Player.query.all()
 	#print(payments)
 	#print(players)
-	return render_template("payout.html", user=current_user, payments=payments, players=players, game_id=game_id)
+	locale.setlocale( locale.LC_ALL, 'English_United States.1252' )
+	locale._override_localeconv = {'n_sign_posn':1}
+
+	new_earnings = []
+	for earning in earnings:
+		if earning.net < 0:
+			net = '-$' + str(abs(earning.net))
+		else:
+			net = '$' + str(earning.net)
+
+		new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
+	return render_template("payout.html", user=current_user, payments=payments, players=players, game_id=game_id, earnings=new_earnings)
+
 
 @views.route('/games', methods=['GET','POST'])
 def games():
 	games = Game.query.all()
 	return render_template("games.html", user=current_user, games=games)
+
 
 @views.route('/export_settlement', methods=['GET','POST'])
 def export_settlement():

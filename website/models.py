@@ -16,6 +16,7 @@ class Player(db.Model):
 	email = db.Column(db.String(300))
 	games_played = db.Column(db.Integer, default=0)
 	aliases = db.relationship('Alias', backref='player')
+	earnings = db.relationship('Earning', backref='player')
 
 class Alias(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -28,6 +29,7 @@ class Game(db.Model):
 	date = db.Column(db.DateTime(timezone=True), default=func.now())
 	urls = db.relationship('Url', backref='game')
 	payments = db.relationship('Payment', backref='game')
+	earnings = db.relationship('Earning', backref='game')
 
 class Url(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -40,3 +42,9 @@ class Payment(db.Model):
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 	payer = db.Column(db.Integer, db.ForeignKey('player.id'))
 	payee = db.Column(db.Integer, db.ForeignKey('player.id'))
+
+class Earning(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	net = db.Column(db.Integer)
+	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
