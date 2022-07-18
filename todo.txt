@@ -1,5 +1,12 @@
 Paginate games
-Sort players page alphabetically
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
-Add commas to settlement numers
+Add commas to settlement numbers
+
+Feature requests:
+Hands played
+Venmo payment/request integration
+Personal stats maybe?
+create profiles that can be linked to players
+Stats by game type
+

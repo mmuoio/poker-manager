@@ -62,7 +62,7 @@ def players():
 			db.session.commit()
 			flash('Player added', category='success')
 
-	players = Player.query.all()
+	players = Player.query.order_by(Player.name.asc()).all()
 	return render_template("players.html", user=current_user, players=players)
 
 
@@ -259,6 +259,8 @@ def link_players():
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
+	print(csv_dicts[0][0]['session_start_at'])
+
 	PNDictionary = []
 	for each_dict in csv_dicts:
 		for row in each_dict:

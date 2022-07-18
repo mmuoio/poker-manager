@@ -1,0 +1,9 @@
+body{
+	height: 100%;
+	background-image: url('card_suits4.png');
+}
+
+.body_container{
+	border-radius: 20px;
+	padding: 10px 35px 35px 35px;
+}
