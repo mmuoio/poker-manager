@@ -47,7 +47,6 @@
 			<tr>
 				<th scope="col" style="text-align:center">FROM</th>
 				<th scope="col" style="text-align:center">TO</th>
-				<th scope="col" style="text-align:center">VENMO</th>
 				<th scope="col" style="text-align:center">AMOUNT</th>
 			</tr>
 			</thead>
@@ -56,18 +55,13 @@
 			<tr>
 				<td>{% for player in players %}
 						{% if player['id'] == payment.payer %}
-						{{ player.name }}
+						<a href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}" target="_blank"><img src="/static/venmo.png" style="height: 20px"/></a> {{ player.name }}
 						{% endif %}
 					{% endfor %}
 					</td>
 					<td>{% for player in players %}
 						{% if player['id'] == payment.payee %}
-						{{ player.name }}
-						{% endif %}
-					{% endfor %}</td>
-					<td>{% for player in players %}
-						{% if player['id'] == payment.payee %}
-						<a href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}" target="_blank">{{player.venmo.replace("@","")}}</a>
+						<a href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}" target="_blank"><img src="/static/venmo.png" style="height: 20px"/></a> {{ player.name }}
 						{% endif %}
 					{% endfor %}</td>
 				<td align="center">${{ payment.amount }}</td>
