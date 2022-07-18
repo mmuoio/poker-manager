@@ -53,11 +53,11 @@ def sign_up():
 			flash('Password is too short.', category='error')
 		else:
 			#add user to db
-			new_user = User(email=email, first_name=first_name, password=generate_password_hash(password1, method='sha256'))
-			db.session.add(new_user)
+			user = User(email=email, first_name=first_name, password=generate_password_hash(password1, method='sha256'))
+			db.session.add(user)
 			db.session.commit()
 			flash('Account creation successful.', category='success')
 			login_user(user, remember=True)
 			return redirect(url_for('views.home'))
 
-	return render_template("signup.html", user=current_user)
+	return render_template("signup.html")

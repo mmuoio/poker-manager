@@ -11,7 +11,7 @@ from io import StringIO
 views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def home():
 	# if request.method == 'POST':
 	# 	note = request.form.get('note')
@@ -23,7 +23,7 @@ def home():
 	# 		db.session.add(new_note)
 	# 		db.session.commit()
 	# 		flash('Note added!', category='success')
-	return render_template("home.html", user=current_user)
+	return redirect(url_for('views.games'))
 
 #@views.route('/delete-note', methods=['POST'])
 #def delete_note():
@@ -437,7 +437,7 @@ def payout():
 
 @views.route('/games', methods=['GET','POST'])
 def games():
-	games = Game.query.all()
+	games = Game.query.order_by(Game.date.desc()).all()
 	return render_template("games.html", user=current_user, games=games)
 
 

@@ -1,4 +1,5 @@
-Sort games desc
+Paginate games
 Sort players page alphabetically
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
+Add commas to settlement numers
