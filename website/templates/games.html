@@ -8,8 +8,8 @@
 	<li class="list-group-item">
 		<div class=" clearfix">
 		<a href="{{url_for('views.payout', game_id=game.id)}}" >{{ game.date.strftime("%m/%d/%Y") }}</a>
-		<a href="{{url_for('views.delete_game', game_id=game.id)}}" class="btn pull-right" onClick=""><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
 		{% if not game.settled and user and  user.is_authenticated %}
+		<a href="{{url_for('views.delete_game', game_id=game.id)}}" class="btn pull-right" onClick=""><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
 		<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-primary pull-right" onClick="">Settle Game</a>
 		{% endif %}
 		<ul>
