@@ -7,3 +7,26 @@ body{
 	border-radius: 20px;
 	padding: 10px 35px 35px 35px;
 }
+
+.settlement-dark{
+	opacity:20%
+}
+.settlement-dark-active{
+	opacity:20%
+}
+.settlement-payment,.settlement-payment-active{
+	background-color: rgb(208, 147, 147);
+	font-weight: bold;
+}
+.settlement-receive,.settlement-receive-active{
+	background-color: rgb(147, 200, 147);
+	font-weight: bold;
+}
+.net-active{
+	background-color: rgb(147, 200, 147);
+	font-weight: bold;
+}
+
+.netRow{
+	cursor: pointer;
+}
