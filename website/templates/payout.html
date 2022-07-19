@@ -94,15 +94,18 @@
 		
 		$('#netTable .netRow').on('click', function(){
 			if(!$(this).hasClass('net-active')){
-				if($('#netTable .netRow.net-active').length==0){
-					$(this).addClass('net-active')
-					
-					$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').addClass('settlement-dark-active');
-					$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').addClass('settlement-payment-active');
-					$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').addClass('settlement-receive-active');
-					}
+				$('#netTable .netRow.net-active').removeClass('net-active');
+				$('.payoutRow').removeClass('settlement-dark-active');
+				$('#payoutTable .payoutRow').removeClass('settlement-payment-active');
+				$('#payoutTable .payoutRow').removeClass('settlement-receive-active');
+				
+				$(this).addClass('net-active');
+				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').addClass('settlement-dark-active');
+				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').addClass('settlement-payment-active');
+				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').addClass('settlement-receive-active');
+				
 			}else{
-				$(this).removeClass('net-active')
+				$(this).removeClass('net-active');
 				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').removeClass('settlement-dark-active');
 				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').removeClass('settlement-payment-active');
 				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').removeClass('settlement-receive-active');
