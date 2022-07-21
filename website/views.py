@@ -490,8 +490,8 @@ def profile():
 	player=null
 	net=0
 	if user.player_id:
-		#player = Player.query.filter_by(id=user.player_id).first()
-		player = Player.query.filter_by(id=28).first()
+		player = Player.query.filter_by(id=user.player_id).first()
+		#player = Player.query.filter_by(id=28).first()
 		if player:
 			earnings = Earning.query.filter_by(player_id=player.id)
 			if earnings:
