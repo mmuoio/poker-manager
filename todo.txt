@@ -4,6 +4,7 @@ Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
 Add commas to settlement numbers
 Make it so you can't resettle a game
+Delete game is not removing earnings
 
 Feature requests:
 Hands played

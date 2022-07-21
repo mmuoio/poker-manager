@@ -6,7 +6,11 @@
 <ul class="list-group list-group-flush" id="players">
 	{% if players %}
 	{% for player in players %}
-	<li class="list-group-item"><a href="{{url_for('views.edit_player', player_id=player.id)}}" ><strong>{{ player.name }}</strong></a> ({{ player.venmo }})
+	<li class="list-group-item">
+		{% if user and user.is_authenticated and user.admin and player.earnings | sum(attribute='net') != 0 %}
+		<div class="pull-right">{{ player.earnings | sum(attribute='net') }}</div>
+		{% endif %}
+		<a href="{{url_for('views.edit_player', player_id=player.id)}}" ><strong>{{ player.name }}</strong></a> ({{ player.venmo }})
 		
 
 		
@@ -18,7 +22,10 @@
 			<span class="badge rounded-pill bg-secondary">{{ alias.alias }}</span>
 			{% endfor %}
 		</em></div>
+		
 	</li>
+	
+
 	{% endfor %}
 	{% endif %}
 
