@@ -9,6 +9,8 @@ class User(db.Model, UserMixin):
 	password = db.Column(db.String(150))
 	first_name = db.Column(db.String(150))
 	last_name = db.Column(db.String(150))
+	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+	admin = db.Column(db.Boolean, default=False)
 
 class Player(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -18,6 +20,7 @@ class Player(db.Model):
 	games_played = db.Column(db.Integer, default=0)
 	aliases = db.relationship('Alias', backref='player')
 	earnings = db.relationship('Earning', backref='player')
+	user = db.relationship('User', backref='player')
 
 class Alias(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

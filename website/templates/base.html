@@ -24,27 +24,47 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #3fa76c;">
-            <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <a class="navbar-brand" href="/">POKER MANAGER</a>
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    {% if user and  user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" id="nav-logout" href="/logout">Logout</a></li>
-                    {% else %}
-                    <li class="nav-item"><a class="nav-link" id="nav-login" href="/login">Login</a></li>
-                    <!--<li class="nav-item"><a class="nav-link" id="nav-signUp" href="/sign-up">Sign Up</a></li>-->
-                    {% endif %}
-                    <li class="nav-item"><a class="nav-link" id="nav-players" href="/players">Players</a></li>
-                    {% if user and  user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" id="nav-import-game" href="/import_game">Import Game</a></li>
-                    {% endif %}
-                    <li class="nav-item"><a class="nav-link" id="nav-import-game" href="/games">Games</a></li>
-                </ul>
-            </div>
+            <div class="container-fluid" style="max-width: 1140px;margin-right:auto;margin-left:auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <a class="navbar-brand" href="/">&spades; POKER MANAGER</a>
+                <div class="collapse navbar-collapse justify-content-start" id="mainNavbar">
+                    <div class="navbar-nav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            
+                            <li class="nav-item" align="center"><a class="nav-link" id="nav-players" href="/players"><i class="fa fa-user" aria-hidden="true"></i><br/>Players</a></li>
+                            {% if user and  user.is_authenticated %}
+                            <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/import_game"><i class="fa fa-upload" aria-hidden="true"></i><br/>Import Game</a></li>
+                            {% endif %}
+                            <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/games"><i class="fa fa-database" aria-hidden="true"></i><Br/>Games</a></li>
+                        </ul>
+                    </div>
+                    <div class="navbar-nav ml-auto" style="margin-left: auto">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            {% if user and  user.is_authenticated %}
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{user.first_name}} {{user.last_name}}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-lg-end">
+                                    <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                                    <li><a class="dropdown-item" id="nav-logout" href="/logout">Logout</a></li>
+                                </ul>
+                            </div>
+
+                            
+                            {% else %}
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                <li class="nav-item"><a class="nav-link" id="nav-signUp" href="/sign-up">Sign Up</a></li>
+                                <li class="nav-item"><a class="nav-link" id="nav-login" href="/login">Login</a></li>
+                            </ul>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </nav>
 
@@ -71,7 +91,7 @@
 
         <br/>
 
-        <div class="container h-100 body_container" style="max-width:1000px; background-color: #fff;">
+        <div class="container h-100 body_container" style="max-width:1140px; background-color: #fff;">
             {% block content %}
             
             {% endblock %}

@@ -9,10 +9,10 @@ body{
 }
 
 .settlement-dark{
-	opacity:20%
+	opacity:40%
 }
 .settlement-dark-active{
-	opacity:20%
+	opacity:40%
 }
 .settlement-payment,.settlement-payment-active{
 	background-color: rgb(208, 147, 147);

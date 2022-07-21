@@ -1,7 +1,9 @@
+Get the date from the ledger instead of current date
 Paginate games
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
 Add commas to settlement numbers
+Make it so you can't resettle a game
 
 Feature requests:
 Hands played
@@ -9,4 +11,18 @@ Venmo payment/request integration
 Personal stats maybe?
 create profiles that can be linked to players
 Stats by game type
+Reset game
 
+Profile
+	edit
+	profile pic
+	link player
+	payment history
+	stats
+		hands played
+		games played
+		wins/losses
+		vpip
+		ROI
+		$/hour
+		BB/100

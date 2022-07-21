@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Profile - {{user.first_name}} {{user.last_name}}{% endblock %}
+
+{% block content %}
+	<br/>
+	<a href="#" class="link-dark pull-right" onClick=""><i class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i></a>
+
+	<div class="profile-icon" style="float: left;margin-right:15px;"><i class="fa fa-user-circle fa-4x" aria-hidden="true"></i></div>
+	<div style="font-size: 16pt;">
+		<b>{{user.first_name}} {{user.last_name}}</b><br/>
+		{{user.email}}
+   </div>
+   <hr/>
+   {% if player %}
+   <h3>Player info:</h3>
+   Name: {{player.name}}<br/>
+   Venmo: {{player.venmo}}<br/>
+   Winnings: {{net}}
+
+
+
+   {% endif %}
+{% endblock %}

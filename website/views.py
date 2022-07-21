@@ -1,11 +1,10 @@
 #from asyncio.windows_events import NULL
-from flask import Blueprint, jsonify, render_template, request, flash, jsonify, redirect, url_for, make_response, Response
+from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for, make_response, Response
 from flask_login import login_required, current_user
 from sqlalchemy import null, func, asc, desc
 from .models import Player, Alias, Game, Payment, Url, Earning
 from . import db
 import json, requests, csv
-import csv
 from io import StringIO
 
 views = Blueprint('views', __name__)
@@ -259,7 +258,7 @@ def link_players():
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
-	print(csv_dicts[0][0]['session_start_at'])
+	game_date = csv_dicts[0][0]['session_start_at']
 
 	PNDictionary = []
 	for each_dict in csv_dicts:
@@ -479,5 +478,24 @@ def delete_game():
 	if game:
 		db.session.delete(game)
 	db.session.commit()
-	games = Game.query.all()
-	return render_template("games.html", user=current_user, games=games)
+	#games = Game.query.all()
+	#return render_template("games.html", user=current_user, games=games)
+	return redirect(url_for('views.games'))
+
+	
+@views.route('/profile', methods=['GET','POST'])
+@login_required
+def profile():
+	user=current_user
+	player=null
+	net=0
+	if user.player_id:
+		#player = Player.query.filter_by(id=user.player_id).first()
+		player = Player.query.filter_by(id=28).first()
+		if player:
+			earnings = Earning.query.filter_by(player_id=player.id)
+			if earnings:
+				for earning in earnings:
+					print(earning)
+					net += earning.net
+	return render_template("profile.html", user=current_user, player=player, net=net)

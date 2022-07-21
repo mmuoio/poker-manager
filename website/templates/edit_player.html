@@ -21,7 +21,7 @@
 		{% for alias in player.aliases %}
 		<!--<input type="text" name="player_alias" id="player_alas" class="form-control" value="{{ alias.alias }}"></input>-->
 		<li class="list-group-item">{{ alias.alias }}
-			<button type="button" class="btn-close float-end" onClick="deleteAlias({{alias.id}},{{player.id}})"></button>
+			{% if user and user.is_authenticated and user.admin %}<button type="button" class="btn-close float-end" onClick="deleteAlias({{alias.id}},{{player.id}})"></button>{% endif %}
 		</li>
 		{% endfor %}
 	</ul>
