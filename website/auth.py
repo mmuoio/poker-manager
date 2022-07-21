@@ -37,6 +37,7 @@ def sign_up():
 		data = request.form
 		email = data.get('email')
 		first_name = data.get('firstName')
+		last_name = data.get('lastName')
 		password1 = data.get('password1')
 		password2 = data.get('password2')
 
@@ -47,6 +48,8 @@ def sign_up():
 			flash('Email must be at least 4 characters long.', category='error')
 		elif len(first_name) < 2:
 			flash('First name must be at least 2 characters long.', category='error')
+		elif len(last_name) < 2:
+			flash('Last name must be at least 2 characters long.', category='error')
 		elif password1 != password2:
 			flash('Password does not match.', category='error')
 		elif len(password1) < 4:
