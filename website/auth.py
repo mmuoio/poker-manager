@@ -64,3 +64,39 @@ def sign_up():
 			return redirect(url_for('views.home'))
 
 	return render_template("signup.html")
+
+@auth.route('/edit_user', methods=['GET','POST'])
+@login_required
+def edit_user():
+	user=current_user
+	
+	if request.method == 'POST':
+		data = request.form
+		email = data.get('email')
+		first_name = data.get('firstName')
+		last_name = data.get('lastName')
+		password1 = data.get('password1')
+		password2 = data.get('password2')
+
+		if len(email) < 4:
+			flash('Email must be at least 4 characters long.', category='error')
+		elif len(first_name) < 2:
+			flash('First name must be at least 2 characters long.', category='error')
+		elif len(last_name) < 2:
+			flash('Last name must be at least 2 characters long.', category='error')
+		elif len(password1) > 0 and password1 != password2:
+			flash('Password does not match.', category='error')
+		else:
+			#add user to db
+			update_user = User.query.filter_by(id=current_user.id).first()
+			update_user.email = email
+			update_user.first_name = first_name
+			update_user.last_name = last_name
+			if len(password1) > 0:
+				update_user.password = generate_password_hash(password1, method='sha256')
+			
+			db.session.commit()
+			flash('User update successful.', category='success')
+			return redirect(url_for('views.profile'))
+		
+	return render_template("edit_user.html", user=current_user)

@@ -471,10 +471,13 @@ def delete_game():
 	game = Game.query.filter_by(id=gameID).first()
 	urls = Url.query.filter_by(game_id=gameID)
 	payments = Payment.query.filter_by(game_id=gameID)
+	earnings = Earning.query.filter_by(game_id=gameID)
 	for url in urls:
 		db.session.delete(url)
 	for payment in payments:
 		db.session.delete(payment)
+	for earning in earnings:
+		db.session.delete(earning)
 	if game:
 		db.session.delete(game)
 	db.session.commit()
@@ -496,6 +499,7 @@ def profile():
 			earnings = Earning.query.filter_by(player_id=player.id)
 			if earnings:
 				for earning in earnings:
-					print(earning)
+					#print(earning)
 					net += earning.net
 	return render_template("profile.html", user=current_user, player=player, net=net)
+	
