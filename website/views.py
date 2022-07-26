@@ -259,10 +259,12 @@ def link_players():
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
 	game_date = csv_dicts[0][0]['session_start_at']
-
+	
+	total_buyin = 0
 	PNDictionary = []
 	for each_dict in csv_dicts:
 		for row in each_dict:
+			total_buyin += int(row['buy_in'])
 			playerIndex = findPlayerIndexByKey(PNDictionary, 'pn_player_id', row['player_id'])
 			if playerIndex >= 0:
 				#player ID exists, add to it
@@ -279,7 +281,7 @@ def link_players():
 					'balance' : float(row['net']),
 					'player_id' : None
 					})
-
+	
 	#####################################
 	#LOOP OVER THE DEBT DICT TO MATCH DATABASE PLAYERS OR SUBMITTED DATA
 	#####################################
@@ -384,7 +386,25 @@ def link_players():
 		new_earning = Earning(net=debt['net'],player_id=debt['player_id'],game_id=game.id)
 		db.session.add(new_earning)
 
+	from datetime import datetime, timedelta
+	
+	#game_date = datetime.strptime(game_date, "%Y-%m-%dT%H:%M:%SZ")
+	game_date_utc = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0)
+	delta = timedelta(hours=9)
+	game_date_est = game_date_utc - delta
+	
+	# print("year: " + game_date[0:4])
+	# print("month: " + game_date[5:7])
+	# print("day: " + game_date[8:10])
+	# print("hour: " + game_date[11:13])
+	# print("minute: " + game_date[14:16])
+	print(game_date_utc)
+	print(game_date_est)
+	#print(game_date_est.strftime('%Y-%m-%d %H:%M:%S'))
+	#game_date = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0,timezone.est)
+	game.date = game_date_est
 	game.settled = True
+	game.buyins = total_buyin
 
 	#####################################
 	#ADD ANY UNUSED ALIASES
@@ -397,7 +417,7 @@ def link_players():
 				new_alias = Alias(alias=alias, player_id=debt['player_id'])
 				db.session.add(new_alias)
 
-
+	
 	db.session.commit()
 	
 	
@@ -415,7 +435,7 @@ def link_players():
 def payout():
 	if request.method == 'GET':
 		game_id = request.args.get('game_id')
-
+		game = Game.query.filter_by(id=game_id).first()
 		if len(game_id) < 1:
 			flash('Game not found.', category='error')
 	payments = Payment.query.filter_by(game_id=game_id)
@@ -425,15 +445,17 @@ def payout():
 	#print(players)
 
 	new_earnings = []
+	total_payouts = 0
 	if earnings:
 		for earning in earnings:
 			if earning.net < 0:
-				net = '-$' + str(abs(earning.net))
+				net = '-' + str("${:,}".format(abs(earning.net)))
+				total_payouts += abs(earning.net)
 			else:
-				net = '$' + str(earning.net)
+				net = str("${:,}".format(earning.net))
 
 			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
-	return render_template("payout.html", user=current_user, payments=payments, players=players, game_id=game_id, earnings=new_earnings)
+	return render_template("payout.html", user=current_user, payments=payments, players=players, game=game, earnings=new_earnings, total_payouts=total_payouts)
 
 
 @views.route('/games', methods=['GET','POST'])

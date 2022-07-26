@@ -34,6 +34,7 @@ class Game(db.Model):
 	urls = db.relationship('Url', backref='game')
 	payments = db.relationship('Payment', backref='game')
 	earnings = db.relationship('Earning', backref='game')
+	buyins = db.Column(db.Integer)
 
 class Url(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
