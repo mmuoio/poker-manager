@@ -9,10 +9,10 @@
 		<div class=" clearfix">
 		<a href="{{url_for('views.payout', game_id=game.id)}}" >{{ game.date.strftime("%m/%d/%Y") }}</a>
 		{% if user and user.is_authenticated and user.admin %}
-		<a href="{{url_for('views.delete_game', game_id=game.id)}}" class="btn pull-right" onClick=""><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
+		<a href="#" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{game.id}}"><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
 		{% endif %}
 		{% if not game.settled and user and  user.is_authenticated and user.admin %}
-		<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-primary pull-right" onClick="">Settle Game</a>
+		<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-primary pull-right">Settle Game</a>
 		{% endif %}
 		<ul>
 			{% for url in game.urls %}
@@ -21,6 +21,27 @@
 		</ul>
 		</div>
 	</li>
+
+	<div class="modal fade" id="confirmDelete_{{game.id}}" tabindex="-1" aria-labelledby="confirmDelete_{{game.id}}Label" aria-hidden="true">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h5 class="modal-title" id="confirmDelete_{{game.id}}Label">Delete this game?</h5>
+			  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body text-wrap">
+				<b>{{ game.date.strftime("%m/%d/%Y") }}</b><br/>
+					{% for url in game.urls %}
+					<i>{{url.url}}</i><br/>
+					{% endfor %}
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+			  <a href="{{url_for('views.delete_game', game_id=game.id)}}" type="button" class="btn btn-primary" >Delete Game</a>
+			</div>
+		  </div>
+		</div>
+	  </div>
 	{% endfor %}
 </ul>
 
