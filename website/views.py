@@ -229,10 +229,10 @@ def link_players():
 			r = requests.get(ledger_url, timeout=2)
 			r.raise_for_status()
 		except:
-			flash("There was an error loading importing the game.", category="error")
+			flash("There was an error loading importing the game1.", category="error")
 			return render_template("import_game.html", user=current_user)
 		if r.status_code != 200:
-			flash("There was an error loading importing the game.", category="error")
+			flash("There was an error loading importing the game2.", category="error")
 			return render_template("import_game.html", user=current_user)
 	
 		#####################################
@@ -524,4 +524,17 @@ def profile():
 					#print(earning)
 					net += earning.net
 	return render_template("profile.html", user=current_user, player=player, net=net)
+	
+
+@views.route('/parse_log', methods=['GET','POST'])
+def parse_log():
+
+	csv_dicts = []
+	csv_file = csv.DictReader(open("website\static\pn_short_log.csv"))
+	for row in csv_file:
+
+		print(row)
+
+	
+	return render_template("games.html", user=current_user)
 	
