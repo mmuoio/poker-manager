@@ -2,14 +2,13 @@ Get the date from the ledger instead of current date
 Paginate games
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
-Add commas to settlement numbers
 Make it so you can't resettle a game
-Delete game is not removing earnings
+make game row clickable instead of date
+Make dates UTC and localize by user
+Make "Select player" a different colo on linking page
 
 Feature requests:
-Hands played
 Venmo payment/request integration
-Personal stats maybe?
 create profiles that can be linked to players
 Stats by game type
 Reset game
@@ -19,11 +18,43 @@ Profile
 	profile pic
 	link player
 	payment history
-	stats
-		hands played
+	game/ledger stats
 		games played
 		wins/losses
-		vpip
 		ROI
 		$/hour
+
+Log importing
+	What to do about double URL games?
+	Parse game type from log
+	log parse:
+			hands played
+			vpip - hands participated / hands played
+			PFR - hands raised / hands participated
+		AF (aggression factor) - post flop (bets+raises) / calls
+		cbet - betting after being the preflop aggressor
+		2b (double barrel) - hands cbet + turn bet
+		3Ba (triple barrel) - bet all 3 streets
+		3b - 3 bet preflop
+		4b - 4 bet preflop
+		FC - fold to cbet
+		F2B - fold to double barrel
+		F3Ba - fold to triple barrel
+		F3 - fold to 3 bet
+		WTSD - went to show down
+
+		categories - heads up, short handed (3-6), full ring (7+)
+
+		post flop - bets/raises
+		post flop - calls
+		preflop agressor instead
+
+
+
+
+		win w/o show
 		BB/100
+
+
+BB Jackpot
+Convert to other poker formats
