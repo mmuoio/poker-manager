@@ -43,12 +43,14 @@ class Game(db.Model):
 	earnings = db.relationship('Earning', backref='game')
 	buyins = db.Column(db.Integer)
 	behaviors = db.relationship('Behavior', backref='game')
-	imported = db.Column(db.Boolean, default=False)
 
 class Url(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	url =  db.Column(db.String(300), unique=True)
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+	imported = db.Column(db.Boolean, default=False)
+	behaviors = db.relationship('Behavior', backref='url')
+	game_type = db.Column(db.String(20))
 
 class Payment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -66,7 +68,12 @@ class Earning(db.Model):
 class Behavior(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+	url_id = db.Column(db.Integer, db.ForeignKey('url.id'))
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+
+	hu_duration_played = db.Column(db.Integer)
+	sr_duration_played = db.Column(db.Integer)
+	ft_duration_played = db.Column(db.Integer)
 	
 	hu_pre_hands_played = db.Column(db.Integer)
 	hu_pre_hands_participated = db.Column(db.Integer)
@@ -76,12 +83,15 @@ class Behavior(db.Model):
 	hu_post_hands_call = db.Column(db.Integer)
 	hu_post_hands_check = db.Column(db.Integer)
 	hu_cbet = db.Column(db.Integer)
+	hu_cbet_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to cbet
 	hu_cbet_fold = db.Column(db.Integer)
 	hu_cbet_call_raise = db.Column(db.Integer)
 	hu_turns_played = db.Column(db.Integer)
 	hu_rivers_played = db.Column(db.Integer)
 	hu_2barrel = db.Column(db.Integer)
+	hu_2barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to double barrel
 	hu_3barrel = db.Column(db.Integer)
+	hu_3barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to triple barrel
 	hu_3bet = db.Column(db.Integer)
 	hu_no_3bet = db.Column(db.Integer)
 	hu_4bet = db.Column(db.Integer)
@@ -105,11 +115,14 @@ class Behavior(db.Model):
 	sr_post_hands_check = db.Column(db.Integer)
 	sr_cbet = db.Column(db.Integer)
 	sr_cbet_fold = db.Column(db.Integer)
+	sr_cbet_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to cbet
 	sr_cbet_call_raise = db.Column(db.Integer)
 	sr_turns_played = db.Column(db.Integer)
 	sr_rivers_played = db.Column(db.Integer)
 	sr_2barrel = db.Column(db.Integer)
+	sr_2barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to double barrel
 	sr_3barrel = db.Column(db.Integer)
+	sr_3barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to triple barrel
 	sr_3bet = db.Column(db.Integer)
 	sr_no_3bet = db.Column(db.Integer)
 	sr_4bet = db.Column(db.Integer)
@@ -132,12 +145,15 @@ class Behavior(db.Model):
 	ft_post_hands_call = db.Column(db.Integer)
 	ft_post_hands_check = db.Column(db.Integer)
 	ft_cbet = db.Column(db.Integer)
+	ft_cbet_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to cbet
 	ft_cbet_fold = db.Column(db.Integer)
 	ft_cbet_call_raise = db.Column(db.Integer)
 	ft_turns_played = db.Column(db.Integer)
 	ft_rivers_played = db.Column(db.Integer)
 	ft_2barrel = db.Column(db.Integer)
+	ft_2barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to double barrel
 	ft_3barrel = db.Column(db.Integer)
+	ft_3barrel_check_fold = db.Column(db.Integer)	#check or fold when given the opportunity to triple barrel
 	ft_3bet = db.Column(db.Integer)
 	ft_no_3bet = db.Column(db.Integer)
 	ft_4bet = db.Column(db.Integer)

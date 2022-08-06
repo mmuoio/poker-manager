@@ -30,3 +30,14 @@ body{
 .netRow{
 	cursor: pointer;
 }
+
+.card{
+	margin: .5rem
+}
+.sub-card{
+	font-size: 10pt;
+	text-align: center;
+}
+.card-title{
+	font-weight: normal;
+}

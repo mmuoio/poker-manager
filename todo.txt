@@ -1,11 +1,10 @@
-Get the date from the ledger instead of current date
 Paginate games
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
 Make it so you can't resettle a game
 make game row clickable instead of date
 Make dates UTC and localize by user
-Make "Select player" a different colo on linking page
+Make "Select player" a different color on linking page
 
 Feature requests:
 Venmo payment/request integration
@@ -27,6 +26,7 @@ Profile
 Log importing
 	What to do about double URL games?
 	Parse game type from log
+	Store hands as strings
 	log parse:
 			hands played
 			vpip - hands participated / hands played
@@ -35,8 +35,8 @@ Log importing
 		cbet - betting after being the preflop aggressor
 		2b (double barrel) - hands cbet + turn bet
 		3Ba (triple barrel) - bet all 3 streets
-		3b - 3 bet preflop
-		4b - 4 bet preflop
+		3b - 3 bet preflop % when given the opportunity
+		4b - 4 bet preflop % when given the opporunity
 		FC - fold to cbet
 		F2B - fold to double barrel
 		F3Ba - fold to triple barrel
@@ -45,9 +45,23 @@ Log importing
 
 		categories - heads up, short handed (3-6), full ring (7+)
 
-		post flop - bets/raises
-		post flop - calls
-		preflop agressor instead
+		post flop - bet/raise count
+		post flop - call count
+		post flop - check
+		preflop agressor ID
+		flop bet when preflop agressor
+		cbet + bet on turn
+		2b + bet on river
+		count of calls after preflop bet
+		count of raises after preflop bet
+		count of calls after preflop 3b
+		count of raises after preflop 3b
+		cuont of folds to cbet vs faced
+		count of fold to 2B vs faced
+		count of fold to 3Ba vs faced
+		count of fold to 3b vs faced
+		count of hands that saw end of hand
+
 
 
 

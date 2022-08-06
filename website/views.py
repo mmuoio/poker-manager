@@ -205,7 +205,7 @@ def link_players():
 
 
 
-
+	from time import sleep
 	if not game_urls:
 		flash("Game URL is missing.", category="error")
 		return redirect(url_for('views.import_game'))
@@ -226,6 +226,7 @@ def link_players():
 		#LOAD THE GAME, ERROR IF FAILED
 		#####################################
 		try:
+			sleep(3)
 			r = requests.get(ledger_url, verify=False, timeout=10)
 			r.raise_for_status()
 		except: #(RuntimeError, TypeError, NameError):
@@ -476,7 +477,18 @@ def payout():
 @views.route('/games', methods=['GET','POST'])
 def games():
 	games = Game.query.order_by(Game.date.desc()).all()
-	return render_template("games.html", user=current_user, games=games)
+	urls = {}
+	for game in games:
+		for url in game.urls:
+			if game.id in urls.keys():
+				if url.imported == False:
+					urls[game.id] = url.imported
+			else:
+				urls[game.id] = url.imported
+	print(urls)
+			
+
+	return render_template("games.html", user=current_user, games=games, imported=urls)
 
 
 @views.route('/export_settlement', methods=['GET','POST'])
@@ -534,28 +546,69 @@ def profile():
 	net=0
 	if user.player_id:
 		player = Player.query.filter_by(id=user.player_id).first()
-		#player = Player.query.filter_by(id=28).first()
+		player = Player.query.filter_by(id=28).first()
 		if player:
-			earnings = Earning.query.filter_by(player_id=player.id)
+			earnings = Earning.query.filter_by(player_id=player.id).all()
 			if earnings:
 				for earning in earnings:
 					#print(earning)
 					net += earning.net
+			
+			#get behavior stats
+			behaviors = Behavior.query.filter_by(player_id=player.id).all()
+			print(behaviors)
+			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
 	return render_template("profile.html", user=current_user, player=player, net=net)
 	
 
+
 @views.route('/import_log', methods=['GET','POST'])
+@login_required
 def import_log():
+	game_id = request.args.get('game_id')
+	game = Game.query.filter_by(id=game_id).first()
+
+	if request.method == 'POST':
+		from werkzeug.utils import secure_filename
+		from werkzeug.datastructures import  FileStorage
+		f = request.files['file']
+		file_name = "website\\static\\uploads\logs\\" + secure_filename(f.filename)
+		
+		urls = []
+		for url in game.urls:
+			if not url.imported:
+				split_url = url.url.split('/')
+				urls.append(split_url[-1])
+		stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
+		if stripped_filename in urls:
+			f.save(file_name)
+			print('file uploaded successfully')
+
+			parsedLog = parse_log(file_name)
+			
+			
+			behavior = parseBehavior(parsedLog, game_id, stripped_filename)
+			#for each in behavior:
+			#	print(each)
+			if len(behavior) > 0:
+				import os
+				os.remove(file_name)
+		else:
+			flash("That file does not belong to this game or has already been uploaded.", category="error")
+
+
+
+
+
 	#csv_file = "website\static\pn_short_log.csv"	#short log
 	#csv_file = "website\static\poker_now_log_pgl7AD32cnWhunjM_Vp4O-u7a.csv"		#long log
 	#csv_file = "website\static\poker_now_log_pgl1--avjXuaD_nuEtDcqij2V.csv"		
-	csv_file = "website\static\poker_now_log_pglZVVjn_1wHYovvDGk7NYaaf.csv"		#name switch log
-	parsedLog = parse_log(csv_file)
-	game_id = request.args.get('game_id')
+	#csv_file = "website\static\poker_now_log_pglZVVjn_1wHYovvDGk7NYaaf.csv"		#name switch log
+	#parsedLog = parse_log(csv_file)
 	
-	preFlopBehavior = parsePreflopBehavior(parsedLog, game_id)
+	#preFlopBehavior = parsePreflopBehavior(parsedLog, game_id)
 	#print(parsedLog['players'])
-	return render_template("import_log.html", user=current_user)
+	return render_template("import_log.html", user=current_user, game=game)
 
 
 
@@ -575,7 +628,7 @@ def parse_log(csv_file):
 	sitStandRegex = '^The player "(.*) @ (.*)" (\w*)\s\w* with the stack of (\d*(?:\.\d\d)?)'
 
 	# Hand regexes
-	beginHandRegex = '^-- starting hand #(\d*).*'
+	beginHandRegex = "^-- starting hand #(\d*)  \(([a-zA-Z' ]*)\).*"
 	yourHandRegex = '^Your hand is (.*)'
 	blindRegex = '^"(.*) @ (.*)" posts a (?:\\bmissed\\b\s|\\bmissing\\b\s)?(\\bbig\\b|\\bsmall\\b) blind of (\d*(?:\.\d\d)?)'
 	straddleRegex = '^"(.*) @ (.*)" posts a straddle of (\d*(?:\.\d\d)?)'
@@ -605,6 +658,7 @@ def parse_log(csv_file):
 	unparsedLogEntries = []
 	handNumber = 0
 	useCents = False
+	gameType = ""
 	sortedCSV = (sorted(csv_file, key = lambda i: i['order']))
 
 	for row in sortedCSV:
@@ -678,6 +732,15 @@ def parse_log(csv_file):
 		# Hands
 		elif re.search(beginHandRegex, row['entry']):
 			handNumber += 1
+			game_search = re.findall(beginHandRegex, row['entry'])[0][1]
+			if game_search == "No Limit Texas Hold'em":
+				gameType = 'NLHE'
+			elif game_search == "Pot Limit Omaha Hi":
+				gameType = 'PLO'
+			elif game_search == "Pot Limit Omaha Hi/Lo 8 or Better":
+				gameType = 'PLO8'
+			
+
 			hands.append({
 				'handNumber': handNumber,
 				'player': None,
@@ -847,14 +910,16 @@ def parse_log(csv_file):
 	for row in hands:
 		if row['player'] != None and not any(row['player'] in sublist for sublist in players) :
 			pokernow_id = PokernowId.query.filter_by(pn_id=row['playerId']).first()
+			alias = Alias.query.filter_by(alias=row['player']).first()
 			if pokernow_id:
 				players.append([row['player'],row['playerId'],pokernow_id.player_id])
+			elif alias:
+				players.append([row['player'],row['playerId'],alias.player_id])
 			else:
 				players.append([row['player'],row['playerId'],None])
 	#for hand in stacks:
 	#	print(hand)	
 	#print(len(hands))
-	
 	return {
 		'players': players,
 		'numberOfHands': handNumber,
@@ -862,14 +927,16 @@ def parse_log(csv_file):
 		'hands': hands,
 		'stacks': stacks,
 		'adminActions': adminActions,
-		'unparsedLogEntries': unparsedLogEntries
+		'unparsedLogEntries': unparsedLogEntries,
+		'gameType' : gameType
 	}
 
-def parsePreflopBehavior(pokerGame, game_id):
+def parseBehavior(pokerGame, game_id, stripped_filename):
 	colorsDark = ['rgba(0,129,0,1)','rgba(0,0,255,1)','rgba(255,0,0,1)','rgba(255,165,0,1)','rgba(128,0,128,1)','rgba(139,69,19,1)','rgba(0,0,0,1)', 'rgb(255,20,147,1)', 'rgba(47,79,79,1)']
 	colorsLight = ['rgba(0,129,0,0.5)','rgba(0,0,255,0.5)','rgba(255,0,0,0.5)','rgba(255,165,0,0.5)','rgba(128,0,128,0.5)','rgba(139,69,19,0.5)','rgba(0,0,0,0.5)', 'rgb(255,20,147,0.5)', 'rgba(47,79,79,0.5)']
 	
 	hands = range(1,pokerGame['numberOfHands']+1)
+	from datetime import datetime, timedelta
 	allPreflopAction = []
 	for hand in hands:
 		#Grab and group each action based off the hand number
@@ -881,6 +948,10 @@ def parsePreflopBehavior(pokerGame, game_id):
 		turnAction = []
 		riverAction = []
 		i = 0
+		handStart = ""
+		handEnd = ""
+
+		
 		while handAction[i]['action'] != 'flop' and handAction[i]['action'] != 'collected':
 			#print(handAction[i]['action'])
 			preflopAction.append(handAction[i])
@@ -891,6 +962,11 @@ def parsePreflopBehavior(pokerGame, game_id):
 		for action in handAction:
 			if action['action'] in ['flop','turn','river']: street += 1
 			if action['action'] == 'collected': street = 4
+
+			if action['action'] == 'beginHand':
+				handStart = action['at']
+			if action['action'] == 'endHand':
+				handEnd = action['at']
 
 			if street == 0:
 				#preflop stuff
@@ -906,9 +982,25 @@ def parsePreflopBehavior(pokerGame, game_id):
 			elif street == 3:
 				#river
 				riverAction.append(action)
-				print(action)
+				#print(action)
+	
+		#game_date = datetime.strptime(game_date, "%Y-%m-%dT%H:%M:%SZ")
+		#print(handStart)
+		handStartDateTime = datetime(int(handStart[0:4]),int(handStart[5:7]),int(handStart[8:10]),int(handStart[11:13]),int(handStart[14:16]), int(handStart[17:19]), 0)
+		handEndDateTime = datetime(int(handEnd[0:4]),int(handEnd[5:7]),int(handEnd[8:10]),int(handEnd[11:13]),int(handEnd[14:16]), int(handEnd[17:19]), 0)
+		#print(hand, (handEndDateTime-handStartDateTime).total_seconds(), handStart, handEnd)
 
-		allPreflopAction.append({'hand':hand, 'numPlayers': len(pokerGame['stacks'][hand-1]['stackSizes']), 'preflopAggressor': preflopAggressor, 'preflopAction':preflopAction, 'flopAction':flopAction, 'turnAction':turnAction, 'riverAction':riverAction})
+		#this is still called allPreflopAction but it has all hand action in it, consider fixing
+		allPreflopAction.append({
+			'hand':hand,
+			'numPlayers': len(pokerGame['stacks'][hand-1]['stackSizes']),
+			'preflopAggressor': preflopAggressor,
+			'preflopAction':preflopAction,
+			'flopAction':flopAction,
+			'turnAction':turnAction,
+			'riverAction':riverAction,
+			'handDuration': (handEndDateTime-handStartDateTime).total_seconds()
+			})
 	#print(allPreflopAction)
 		
 
@@ -927,6 +1019,7 @@ def parsePreflopBehavior(pokerGame, game_id):
 			'player_id' : player_id,
 			'names' : player_values[0],
 			'pn_ids' : player_values[1],
+			'duration_played' : [0,0,0],
 			
 			'pre_handsPlayed' : [0,0,0],
 			'pre_handsRaised' : [0,0,0],
@@ -941,16 +1034,23 @@ def parsePreflopBehavior(pokerGame, game_id):
 			'post_hands_call' : [0,0,0],
 			'post_hands_check' : [0,0,0],
 			'cbet' : [0,0,0],
+			'cbet_fold' : [0,0,0],
+			'cbet_call_raise' : [0,0,0],
+			'cbet_check_fold' : [0,0,0],
 			'fold_cbet' : [0,0,0],
 			'call_raise_cbet' : [0,0,0],
 			'2barrel' : [0,0,0],
+			'2barrel_check_fold' : [0,0,0],
 			'fold_2b' : [0,0,0],
 			'call_raise_2b' : [0,0,0],
 			'3barrel' : [0,0,0],
+			'3barrel_check_fold' : [0,0,0],
 			'fold_3b' : [0,0,0],
 			'call_raise_3b' : [0,0,0],
 			'fold_3bet' : [0,0,0],
 			'call_raise_3bet' : [0,0,0],
+			'turns_played' : [0,0,0,0],
+			'rivers_played' : [0,0,0,0],
 			'wtsd' : [0,0,0]
 		})
 	
@@ -977,13 +1077,12 @@ def parsePreflopBehavior(pokerGame, game_id):
 			current[2] += amount
 		return current
 
-	print(allPlayerActions)
+	#print(allPlayerActions)
 	allBehavior = []
 	import json
 	for hand in allPreflopAction:
 
-		print(json.dumps(hand, indent=4))
-		#print(hand)
+		#print(json.dumps(hand, indent=4))
 		preflopPlayed = []				# hands dealt cards
 		preflopParticipated = []		# any hand not folded
 		preflopRaised = []				# hands bet or raised
@@ -1000,16 +1099,19 @@ def parsePreflopBehavior(pokerGame, game_id):
 		postflopChecked = []			# hands checked
 
 		cbet = []						# hands bet on the flop when PFA (interrupted by donk)
+		cbetCheckFold = []				# hands checked or folded on the flop when PFA (interrupted by donk)
 		cbetFold = []					# hands folded to a cbet
 		cbetCallRaise = []				# hands called or raised to a cbet
 
 		turnPlayed = []					# turns seen
 		barrel2 = []					# hands bet on turn after cbetting (interrupted by donk)
+		barrel2CheckFold = []			# check or fold when given the opportunity to double barrel
 		barrel2Fold = []				# hands folded to a double barrel
 		barrel2CallRaise = []			# hands called or raised to a double barrel
 		
 		riverPlayed = []				# rivers seen
 		barrel3 = []					# hands bet on turn after cbetting (interrupted by donk)
+		barrel3CheckFold = []			# check or fold when given the opportunity to triple barrel
 		barrel3Fold = []				# hands folded to a triple barrel
 		barrel3CallRaise = []			# hands called or raised to a triple barrel
 		
@@ -1019,6 +1121,7 @@ def parsePreflopBehavior(pokerGame, game_id):
 
 		lastAction = None
 		last3Bet = False
+		betCount = 1
 		#preflop action
 		for action in hand['preflopAction']:
 			if action['player'] != None:
@@ -1027,10 +1130,16 @@ def parsePreflopBehavior(pokerGame, game_id):
 				preflopParticipated.append(action['player'])
 				preflopRaised.append(action['player'])
 				preflopAggressor = action['player']
+				betCount += 1
 			elif action['action'] in ['calls', 'straddles']:
 				preflopParticipated.append(action['player'])
 			
-			
+			#reaction to 3 bet
+			if action['action'] == 'fold' and betCount == 3:
+				bet3Fold.append(action['player'])
+			elif action['action'] == 'raises to' and betCount == 3:
+				bet3CallRaise.append(action['player'])
+
 			#3 bet
 			if lastAction == 'bets' and action['action'] == 'raises to':
 				preflop3bet.append(action['player'])
@@ -1061,6 +1170,9 @@ def parsePreflopBehavior(pokerGame, game_id):
 			if action['action'] == 'bets' and action['player'] == preflopAggressor:
 				cbet.append(action['player'])
 				lastCBet = True
+			if action['action'] in ['checks','folds'] and action['player'] == preflopAggressor and lastAction not in ['bets','raises to','calls']:
+				cbetCheckFold.append(action['player'])
+			
 			if action['action'] == 'folds' and lastCBet:
 				cbetFold.append(action['player'])
 			if action['action'] in ['calls', 'raises to'] and lastCBet:
@@ -1083,6 +1195,9 @@ def parsePreflopBehavior(pokerGame, game_id):
 			if action['action'] == 'bets' and action['player'] == preflopAggressor and lastCBet:
 				barrel2.append(action['player'])
 				lastBarrel2 = True
+			if action['action'] in ['checks','folds'] and action['player'] == preflopAggressor and lastCBet and lastAction not in ['bets','raises to','calls']:
+				barrel2CheckFold.append(action['player'])
+				
 			if action['action'] == 'folds' and lastBarrel2:
 				barrel2Fold.append(action['player'])
 			if action['action'] in ['calls', 'raises to'] and lastBarrel2:
@@ -1109,6 +1224,9 @@ def parsePreflopBehavior(pokerGame, game_id):
 			if action['action'] == 'bets' and action['player'] == preflopAggressor and lastBarrel2:
 				barrel3.append(action['player'])
 				lastBarrel3 = True
+			if action['action'] in ['checks','folds'] and action['player'] == preflopAggressor and lastBarrel2 and lastAction not in ['bets','raises to','calls']:
+				barrel3CheckFold.append(action['player'])
+
 			if action['action'] == 'folds' and lastBarrel3:
 				barrel3Fold.append(action['player'])
 			if action['action'] in ['calls', 'raises to'] and lastBarrel3:
@@ -1124,6 +1242,7 @@ def parsePreflopBehavior(pokerGame, game_id):
 		#run counts on each of the lists of names
 		for each in [*set(preflopPlayed)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['duration_played'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'], hand['numPlayers'], int(hand['handDuration']))
 		for each in [*set(preflopParticipated)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsParticipated'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsParticipated'], hand['numPlayers'])
 		for each in [*set(preflopRaised)]:
@@ -1149,163 +1268,242 @@ def parsePreflopBehavior(pokerGame, game_id):
 			
 		for each in [*set(cbet)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['cbet'], hand['numPlayers'])
+		for each in [*set(cbetCheckFold)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['cbet_check_fold'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['cbet_check_fold'], hand['numPlayers'])
 		for each in [*set(cbetFold)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_cbet'], hand['numPlayers'])
 		for each in [*set(cbetCallRaise)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_cbet'], hand['numPlayers'])
 			
 		for each in [*set(barrel2)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['2barrel'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['2barrel'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['2barrel'], hand['numPlayers'])
+		for each in [*set(barrel2CheckFold)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['2barrel_check_fold'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['2barrel_check_fold'], hand['numPlayers'])
 		for each in [*set(barrel2Fold)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_2b'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_2b'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_2b'], hand['numPlayers'])
 		for each in [*set(barrel2CallRaise)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_2b'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_2b'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_2b'], hand['numPlayers'])
 			
 		for each in [*set(barrel3)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['3barrel'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['3barrel'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['3barrel'], hand['numPlayers'])
+		for each in [*set(barrel3CheckFold)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['3barrel_check_fold'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['3barrel_check_fold'], hand['numPlayers'])
 		for each in [*set(barrel3Fold)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_3b'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_3b'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_3b'], hand['numPlayers'])
 		for each in [*set(barrel3CallRaise)]:
-			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_cbet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_3b'], hand['numPlayers'])
+			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_3b'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_3b'], hand['numPlayers'])
 
+		for each in [*set(turnPlayed)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['turns_played'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['turns_played'], hand['numPlayers'])
+		for each in [*set(riverPlayed)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['rivers_played'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['rivers_played'], hand['numPlayers'])
+		
+		for each in [*set(bet3Fold)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['fold_3bet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['fold_3bet'], hand['numPlayers'])
+		for each in [*set(bet3CallRaise)]:
+			allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_3bet'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['call_raise_3bet'], hand['numPlayers'])
 			
 		for each in [*set(wtsd)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'], hand['numPlayers'])
 
-	for each in allPlayerActions:
-		print(each)
-	return allPlayerActions
+	#for each in allPlayerActions:
+	#	print(each)
+	urls = Url.query.filter_by(game_id=game_id).all()
+	which_url = None
+	for i, url in enumerate(urls):
+		if stripped_filename in url.url:
+			which_url = i
 
-	preflopBehavior = []
-	#for i, player in enumerate(pokerGame['players']):
-	for player_id, player_values in combinedPlayerList.items():
-		pre_handsPlayed = [0,0,0]
-		pre_handsRaised = [0,0,0]
-		pre_handsParticipated = [0,0,0]
-
-		for hand in allPreflopAction:
-			playerActions = [x for x in hand['preflopAction'] if x['playerId'] in player_values[1]]	#search a list of player IDs
-			if (len(playerActions) >= 1):
-				#pre_handsPlayed += 1
-				pre_handsPlayed = incrementCount(pre_handsPlayed, hand['numPlayers'])
-				allActions = []
-				for action in playerActions:
-					allActions.append(action['action'])
-				if 'raises to' in allActions or 'bets' in allActions:
-					#pre_handsRaised += 1
-					#pre_handsParticipated += 1
-					pre_handsRaised = incrementCount(pre_handsRaised, hand['numPlayers'])
-					pre_handsParticipated = incrementCount(pre_handsParticipated, hand['numPlayers'])
-				elif 'calls' in allActions or 'straddle' in allActions:
-					#pre_handsParticipated += 1
-					pre_handsParticipated = incrementCount(pre_handsParticipated, hand['numPlayers'])
-		
-		#search preflopBehavior to see if ID exists already
-		playerIndex = -1
-		for i, dic in enumerate(preflopBehavior):
-			if dic['player_id'] == player_id:
-				playerIndex = i
-		if playerIndex >= 0:
-			#preflopBehavior[playerIndex]['player'].append(player[0])
-			preflopBehavior[playerIndex]['hu_pre_handsPlayed'] += pre_handsPlayed[0]
-			preflopBehavior[playerIndex]['hu_pre_handsParticipated'] += pre_handsParticipated[0]
-			preflopBehavior[playerIndex]['hu_pre_handsRaised'] += pre_handsRaised[0]
-		else:
-			preflopBehavior.append({
-				'player': player_values[0],
-				'playerId': player_values[1],
-				'player_id' : player_id,
-				#'borderColor': colorsDark[i],
-				#'backgroundColor': colorsLight[i],
-				'hu_pre_handsPlayed': pre_handsPlayed[0],
-				'hu_pre_handsParticipated': pre_handsParticipated[0],
-				'hu_pre_handsRaised': pre_handsRaised[0],
-				
-				'sr_pre_handsPlayed': pre_handsPlayed[1],
-				'sr_pre_handsParticipated': pre_handsParticipated[1],
-				'sr_pre_handsRaised': pre_handsRaised[1],
-				
-				'ft_pre_handsPlayed': pre_handsPlayed[2],
-				'ft_pre_handsParticipated': pre_handsParticipated[2],
-				'ft_pre_handsRaised': pre_handsRaised[2],
-				#'VPIP': 0 if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
-				#'PFR': 0 if handsParticipated == 0 else round((handsRaised / handsParticipated * 100),2)
-			})
-	for eachBehavior in preflopBehavior:
-		if eachBehavior['player_id']:
-			behavior = db.session.query(Behavior).filter(Behavior.player_id.like(eachBehavior['player_id']),Behavior.game_id.like(game_id)).all()
+	for eachPlayer in allPlayerActions:
+		#print(eachPlayer)
+		if eachPlayer['player_id']:
+			behavior = db.session.query(Behavior).filter(Behavior.player_id.like(eachPlayer['player_id']),Behavior.game_id.like(game_id)).all()
 			
 			if not behavior:
 				new_behavior = Behavior(
 					game_id=game_id,
-					player_id=eachBehavior['player_id'],
-					hu_pre_hands_played=eachBehavior['hu_pre_handsPlayed'],
-					hu_pre_hands_participated=eachBehavior['hu_pre_handsParticipated'],
-					hu_pre_hands_raised=eachBehavior['hu_pre_handsRaised']
+					url_id=urls[which_url].id,
+					player_id=eachPlayer['player_id'],
+					hu_duration_played = eachPlayer['duration_played'][0],
+					sr_duration_played = eachPlayer['duration_played'][1],
+					ft_duration_played = eachPlayer['duration_played'][2],
+
+					hu_pre_hands_played = eachPlayer['pre_handsPlayed'][0],
+					hu_pre_hands_participated = eachPlayer['pre_handsParticipated'][0],
+					hu_pre_hands_raised = eachPlayer['pre_handsRaised'][0],
+					hu_post_hands_played = eachPlayer['post_hands_played'][0],
+					hu_post_hands_bet_raise = eachPlayer['post_hands_bet_raise'][0],
+					hu_post_hands_call = eachPlayer['post_hands_call'][0],
+					hu_post_hands_check = eachPlayer['post_hands_check'][0],
+					hu_cbet = eachPlayer['cbet'][0],
+					hu_cbet_check_fold = eachPlayer['cbet_check_fold'][0],
+					hu_cbet_fold = eachPlayer['cbet_fold'][0],
+					hu_cbet_call_raise = eachPlayer['cbet_call_raise'][0],
+					hu_turns_played = eachPlayer['turns_played'][0],
+					hu_rivers_played = eachPlayer['rivers_played'][0],
+					hu_2barrel = eachPlayer['2barrel'][0],
+					hu_2barrel_check_fold = eachPlayer['2barrel_check_fold'][0],
+					hu_3barrel = eachPlayer['3barrel'][0],
+					hu_3barrel_check_fold = eachPlayer['3barrel_check_fold'][0],
+					hu_3bet = eachPlayer['3bet'][0],
+					hu_no_3bet = eachPlayer['no_3bet'][0],
+					hu_4bet = eachPlayer['4bet'][0],
+					hu_no_4bet = eachPlayer['no_4bet'][0],
+					hu_fold_cbet = eachPlayer['fold_cbet'][0],
+					hu_call_raise_cbet = eachPlayer['call_raise_cbet'][0],
+					hu_fold_2b = eachPlayer['fold_2b'][0],
+					hu_call_raise_2b = eachPlayer['call_raise_2b'][0],
+					hu_fold_3b = eachPlayer['fold_3b'][0],
+					hu_call_raise_3b = eachPlayer['call_raise_3b'][0],
+					hu_fold_3bet = eachPlayer['fold_3bet'][0],
+					hu_call_raise_3bet = eachPlayer['call_raise_3bet'][0],
+					hu_wtsd = eachPlayer['wtsd'][0],
+
+					sr_pre_hands_played = eachPlayer['pre_handsPlayed'][1],
+					sr_pre_hands_participated = eachPlayer['pre_handsParticipated'][1],
+					sr_pre_hands_raised = eachPlayer['pre_handsRaised'][1],
+					sr_post_hands_played = eachPlayer['post_hands_played'][1],
+					sr_post_hands_bet_raise = eachPlayer['post_hands_bet_raise'][1],
+					sr_post_hands_call = eachPlayer['post_hands_call'][1],
+					sr_post_hands_check = eachPlayer['post_hands_check'][1],
+					sr_cbet = eachPlayer['cbet'][1],
+					sr_cbet_check_fold = eachPlayer['cbet_check_fold'][1],
+					sr_cbet_fold = eachPlayer['cbet_fold'][1],
+					sr_cbet_call_raise = eachPlayer['cbet_call_raise'][1],
+					sr_turns_played = eachPlayer['turns_played'][1],
+					sr_rivers_played = eachPlayer['rivers_played'][1],
+					sr_2barrel = eachPlayer['2barrel'][1],
+					sr_2barrel_check_fold = eachPlayer['2barrel_check_fold'][1],
+					sr_3barrel = eachPlayer['3barrel'][1],
+					sr_3barrel_check_fold = eachPlayer['3barrel_check_fold'][1],
+					sr_3bet = eachPlayer['3bet'][1],
+					sr_no_3bet = eachPlayer['no_3bet'][1],
+					sr_4bet = eachPlayer['4bet'][1],
+					sr_no_4bet = eachPlayer['no_4bet'][1],
+					sr_fold_cbet = eachPlayer['fold_cbet'][1],
+					sr_call_raise_cbet = eachPlayer['call_raise_cbet'][1],
+					sr_fold_2b = eachPlayer['fold_2b'][1],
+					sr_call_raise_2b = eachPlayer['call_raise_2b'][1],
+					sr_fold_3b = eachPlayer['fold_3b'][1],
+					sr_call_raise_3b = eachPlayer['call_raise_3b'][1],
+					sr_fold_3bet = eachPlayer['fold_3bet'][1],
+					sr_call_raise_3bet = eachPlayer['call_raise_3bet'][1],
+					sr_wtsd = eachPlayer['wtsd'][1],
+
+					ft_pre_hands_played = eachPlayer['pre_handsPlayed'][2],
+					ft_pre_hands_participated = eachPlayer['pre_handsParticipated'][2],
+					ft_pre_hands_raised = eachPlayer['pre_handsRaised'][2],
+					ft_post_hands_played = eachPlayer['post_hands_played'][2],
+					ft_post_hands_bet_raise = eachPlayer['post_hands_bet_raise'][2],
+					ft_post_hands_call = eachPlayer['post_hands_call'][2],
+					ft_post_hands_check = eachPlayer['post_hands_check'][2],
+					ft_cbet = eachPlayer['cbet'][2],
+					ft_cbet_check_fold = eachPlayer['cbet_check_fold'][2],
+					ft_cbet_fold = eachPlayer['cbet_fold'][2],
+					ft_cbet_call_raise = eachPlayer['cbet_call_raise'][2],
+					ft_turns_played = eachPlayer['turns_played'][2],
+					ft_rivers_played = eachPlayer['rivers_played'][2],
+					ft_2barrel = eachPlayer['2barrel'][2],
+					ft_2barrel_check_fold = eachPlayer['2barrel_check_fold'][2],
+					ft_3barrel = eachPlayer['3barrel'][2],
+					ft_3barrel_check_fold = eachPlayer['3barrel_check_fold'][2],
+					ft_3bet = eachPlayer['3bet'][2],
+					ft_no_3bet = eachPlayer['no_3bet'][2],
+					ft_4bet = eachPlayer['4bet'][2],
+					ft_no_4bet = eachPlayer['no_4bet'][2],
+					ft_fold_cbet = eachPlayer['fold_cbet'][2],
+					ft_call_raise_cbet = eachPlayer['call_raise_cbet'][2],
+					ft_fold_2b = eachPlayer['fold_2b'][2],
+					ft_call_raise_2b = eachPlayer['call_raise_2b'][2],
+					ft_fold_3b = eachPlayer['fold_3b'][2],
+					ft_call_raise_3b = eachPlayer['call_raise_3b'][2],
+					ft_fold_3bet = eachPlayer['fold_3bet'][2],
+					ft_call_raise_3bet = eachPlayer['call_raise_3bet'][2],
+					ft_wtsd = eachPlayer['wtsd'][2],
 				)
 				db.session.add(new_behavior)
-				db.session.commit()
-		#print(eachBehavior)
-		
-	return preflopBehavior
-# 	preflopBehaviorChartData = preflopBehavior.map(function(player){
-#     return {
-#       label: player.player,
-#       data: [{x: player.PFR, y: player.VPIP}],
-#       borderWidth: 1,
-#       borderColor: player.borderColor,
-#       backgroundColor: player.backgroundColor
-#     }
-#   })
-#   return {
-#     type: 'scatter',
-#     data: {
-#       datasets: preflopBehaviorChartData
-#     },
-#     options: {
-#       maintainAspectRatio: false,
-#       elements: {
-#         point: {
-#           radius: 9,
-#           hitRadius: 9,
-#           hoverRadius: 11
-#         }
-#       },
-#       legend: {
-#         labels: {
-#           usePointStyle: true,
-#           pointStyle: 'circle',
-#           boxWidth: 12,
-#           fontSize: 16,
-#           fontFamily: "Roboto, sans-serif",
-#           padding: 22
-#         }
-#       },
-#       scales: {
-#         yAxes: [{
-#           scaleLabel: {
-#             display: true,
-#             labelString: 'Voluntary Participation (% of hands called)',
-#             fontSize: 18,
-#             fontFamily: "Roboto, sans-serif"
-#           },
-#           ticks: {
-#             precision:0,
-#             beginAtZero: true
-#           }
-#         }],
-#         xAxes: [{
-#           scaleLabel: {
-#             display: true,
-#             labelString: 'Aggression (% of hands raised)',
-#             fontSize: 18,
-#             fontFamily: "Roboto, sans-serif"
-#           },
-#           ticks: {
-#             precision: 0,
-#             beginAtZero: true
-#           }
-#         }]
-#       }
-#     }
-#   }
+
+	urls[which_url].imported = True
+	urls[which_url].game_type = pokerGame['gameType']
+	db.session.commit()
+
+	return allPlayerActions
+
+
+@views.route('/player_stats', methods=['GET','POST'])
+@login_required
+def player_stats():
+	user=current_user
+	player=null
+	net=0
+	if user.player_id:
+		#player = Player.query.filter_by(id=user.player_id).first()
+		player = Player.query.filter_by(id=28).first()
+		if player:
+			
+			#get behavior stats
+			behaviors = Behavior.query.filter_by(player_id=player.id).all()
+			player_behavior = {
+				'pre_hands_played' : [0,0,0,0],
+				'pre_hands_participated' : [0,0,0,0],
+				'pre_hands_raised' : [0,0,0,0],
+				'post_hands_played' : [0,0,0,0],
+				'post_hands_bet_raise' : [0,0,0,0],
+				'post_hands_call' : [0,0,0,0],
+				'post_hands_check' : [0,0,0,0],
+				'cbet' : [0,0,0,0],
+				'cbet_check_fold' : [0,0,0,0],
+				'cbet_fold' : [0,0,0,0],
+				'cbet_call_raise' : [0,0,0,0],
+				'turns_played' : [0,0,0,0],
+				'rivers_played' : [0,0,0,0],
+				'2barrel' : [0,0,0,0],
+				'2barrel_check_fold' : [0,0,0,0],
+				'3barrel' : [0,0,0,0],
+				'3barrel_check_fold' : [0,0,0,0],
+				'3bet' : [0,0,0,0],
+				'no_3bet' : [0,0,0,0],
+				'4bet' : [0,0,0,0],
+				'no_4bet' : [0,0,0,0],
+				'fold_cbet' : [0,0,0,0],
+				'call_raise_cbet' : [0,0,0,0],
+				'fold_2b' : [0,0,0,0],
+				'call_raise_2b' : [0,0,0,0],
+				'fold_3b' : [0,0,0,0],
+				'call_raise_3b' : [0,0,0,0],
+				'fold_3bet' : [0,0,0,0],
+				'call_raise_3bet' : [0,0,0,0],
+				'wtsd' : [0,0,0,0],
+				}
+			
+
+			for behavior in behaviors:
+				for each_behavior in player_behavior.keys():
+					#print(each_behavior)
+					x = eval('behavior.hu_'+each_behavior)
+					y = eval('behavior.sr_'+each_behavior)
+					z = eval('behavior.ft_'+each_behavior)
+					player_behavior[each_behavior][0] += x
+					player_behavior[each_behavior][1] += y
+					player_behavior[each_behavior][2] += z
+					player_behavior[each_behavior][3] += x+y+z
+
+			#print(player_behavior)
+				
+			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
+			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
+	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior)
+
+@views.route('/delete_log', methods=['GET'])
+def delete_log():
+	urlID = request.args.get('url_id')
+	
+	url = Url.query.filter_by(id=urlID).first()
+	behaviors = Behavior.query.filter_by(id=urlID)
+	url.imported = False
+	for behavior in behaviors:
+		db.session.delete(behavior)
+	db.session.commit()
+	#games = Game.query.all()
+	#return render_template("games.html", user=current_user, games=games)
+	return redirect(url_for('views.import_log', game_id=url.game_id))

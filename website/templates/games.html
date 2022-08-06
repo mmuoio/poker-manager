@@ -29,15 +29,15 @@
 				{% if user and user.is_authenticated and user.admin %}
 				<a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{game.id}}" data-toggle="tooltip" data-placement="top" title="Delete Game"><i class="fa fa-trash" aria-hidden="true"></i></a>
 				{% if  not game.settled %}
-				<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Settle Game"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
+				<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Settle Game"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
 				{% else %}
 				<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
 				{% endif %}
-				<!--{% if  not game.imported %}
-				<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Upload Logs"><i class="fa fa-upload" aria-hidden="true"></i></a>
+				{% if  not imported[game.id] %}
+				<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Upload Logs"><i class="fa fa-upload" aria-hidden="true"></i></a>
 				{% else %}
 				<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-upload" aria-hidden="true"></i></a>
-				{% endif %}-->
+				{% endif %}
 				{% endif %}
 			</td>
 			{% endif %}
