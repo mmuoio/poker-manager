@@ -1317,8 +1317,9 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	for eachPlayer in allPlayerActions:
 		#print(eachPlayer)
 		if eachPlayer['player_id']:
-			behavior = db.session.query(Behavior).filter(Behavior.player_id.like(eachPlayer['player_id']),Behavior.game_id.like(game_id)).all()
-			
+			behavior = Behavior.query.filter_by(player_id=eachPlayer['player_id'],game_id=game_id).all()
+			for each in behavior:
+				print(each.id)
 			if not behavior:
 				new_behavior = Behavior(
 					game_id=game_id,
@@ -1499,7 +1500,7 @@ def delete_log():
 	urlID = request.args.get('url_id')
 	
 	url = Url.query.filter_by(id=urlID).first()
-	behaviors = Behavior.query.filter_by(id=urlID)
+	behaviors = Behavior.query.filter_by(url_id=urlID).all()
 	url.imported = False
 	for behavior in behaviors:
 		db.session.delete(behavior)
