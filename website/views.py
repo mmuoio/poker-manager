@@ -260,8 +260,7 @@ def link_players():
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
-	game_date = csv_dicts[0][0]['session_start_at']
-	
+	game_date = csv_dicts[0][len(csv_dicts[0])-1]['session_start_at']
 	total_buyin = 0
 	PNDictionary = []
 	for each_dict in csv_dicts:
@@ -1374,7 +1373,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
-	game_date = csv_dicts[0][0]['session_start_at']
+	game_date = csv_dicts[0][len(csv_dicts[0])-1]['session_start_at']
 	
 	def findPlayerIndexByKeyLog(PNDictionary, key, val):
 		for i, dic in enumerate(PNDictionary):
@@ -1440,7 +1439,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 			finalLedger.append(debt)
 	
 	from datetime import datetime, timedelta
-	
+	print(csv_dicts[0][0])
 	game_date_utc = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0)
 	delta = timedelta(hours=9)
 	game_date_est = game_date_utc - delta
