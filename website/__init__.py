@@ -21,8 +21,8 @@ migrate = Migrate()
 def create_app():
 	app = Flask(__name__)
 	app.config['SECRET_KEY'] = 'secret_key_password_string'
-	#app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-	app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://sbhdiltjnlthsz:4f82ba903b0b4e729e03dacdabb56352b8bbbc3780ae1e28850994a6e285e9fa@ec2-3-219-229-143.compute-1.amazonaws.com:5432/d3k32m6clt9ihg'
+	app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+	#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://sbhdiltjnlthsz:4f82ba903b0b4e729e03dacdabb56352b8bbbc3780ae1e28850994a6e285e9fa@ec2-3-219-229-143.compute-1.amazonaws.com:5432/d3k32m6clt9ihg'
 	
 	migrate.init_app(app, db, render_as_batch=True)
 	db.init_app(app)

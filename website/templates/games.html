@@ -8,7 +8,7 @@
 	  <tr>
 		<th scope="col">DATE</th>
 		<th scope="col">URLS</th>
-		<!--<th scope="col" style="text-align:center">TYPE</th>-->
+		<th scope="col" style="text-align:center">TYPE</th>
 		{% if user and user.is_authenticated and user.admin %}
 		<th scope="col" style="text-align:center">ACTIONS</th>
 		{% endif %}
@@ -23,7 +23,9 @@
 				<i>{{url.url}}</i><br/>
 				{% endfor %}
 			</td>
-			<!--<td align="center" style="vertical-align: middle;">NLHE</td>-->
+			<td align="center" style="vertical-align: middle;">
+				{{ game.urls.game_type|join(', ')}}
+			</td>
 			{% if user and user.is_authenticated and user.admin %}
 			<td align="center" style="vertical-align: middle;">
 				{% if user and user.is_authenticated and user.admin %}

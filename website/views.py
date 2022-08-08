@@ -2,7 +2,7 @@
 from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for, make_response, Response
 from flask_login import login_required, current_user
 from sqlalchemy import null, func, asc, desc
-from .models import Player, Alias, Game, Payment, Url, Earning, PokernowId, Behavior
+from .models import Bankroll, Player, Alias, Game, Payment, Url, Earning, PokernowId, Behavior
 from . import db
 import json, requests, csv
 from io import StringIO
@@ -150,7 +150,7 @@ def import_game():
 					if not new_game:
 						new_game = Game(settled=False)
 						db.session.add(new_game)
-						db.session.commit()
+						db.session.flush()
 					new_url = Url(url = game_url, game_id=new_game.id)
 					db.session.add(new_url)
 			db.session.commit()
@@ -321,6 +321,8 @@ def link_players():
 				if eachNickname not in finalLedger[playerIndex]['player_nickname']:
 					finalLedger[playerIndex]['player_nickname'].append(eachNickname)
 			finalLedger[playerIndex]['net'] += debt['net']
+			finalLedger[playerIndex]['buy_in'] += debt['buy_in']
+			finalLedger[playerIndex]['cash_out'] += debt['cash_out']
 			finalLedger[playerIndex]['balance'] += debt['balance']
 		else:
 			finalLedger.append(debt)
@@ -383,10 +385,6 @@ def link_players():
 	debts = (sorted(finalLedger, key = lambda i: i['net']))
 	while balance_remaining(debts):
 		settle(debts)
-	
-	for debt in debts:
-		new_earning = Earning(net=debt['net'],player_id=debt['player_id'],game_id=game.id)
-		db.session.add(new_earning)
 
 	from datetime import datetime, timedelta
 	
@@ -408,10 +406,16 @@ def link_players():
 	game.settled = True
 	game.buyins = total_buyin
 
-	#####################################
-	#ADD ANY UNUSED ALIASES
-	#####################################
 	for debt in debts:
+		#####################################
+		#ADD TO EARNINGS TABLE
+		#####################################
+		new_earning = Earning(net=debt['net'],player_id=debt['player_id'],game_id=game.id)
+		db.session.add(new_earning)
+
+		#####################################
+		#ADD ANY UNUSED ALIASES
+		#####################################
 		for alias in debt['player_nickname']:
 			alias_lookup = Alias.query.filter_by(alias=alias).first()
 			if not alias_lookup:
@@ -419,16 +423,16 @@ def link_players():
 				new_alias = Alias(alias=alias, player_id=debt['player_id'])
 				db.session.add(new_alias)
 
-	#####################################
-	#ADD POKER NOW IDS TO DB
-	#####################################
-	for debt in debts:
+		#####################################
+		#ADD POKER NOW IDS TO DB
+		#####################################
+		print(debt)
 		for pn_id in debt['pn_player_id']:
 			pnid_lookup = PokernowId.query.filter_by(pn_id=pn_id).first()
 			if pnid_lookup:
 				#DELETE EXISTING pnid
 				db.session.delete(pnid_lookup)
-				db.session.commit()
+				db.session.flush()
 			#ADD TO PokernowId TABLE
 			new_pnid = PokernowId(pn_id=pn_id, player_id=debt['player_id'])
 			db.session.add(new_pnid)
@@ -485,7 +489,7 @@ def games():
 					urls[game.id] = url.imported
 			else:
 				urls[game.id] = url.imported
-	print(urls)
+	#print(urls)
 			
 
 	return render_template("games.html", user=current_user, games=games, imported=urls)
@@ -522,6 +526,7 @@ def delete_game():
 	payments = Payment.query.filter_by(game_id=gameID)
 	earnings = Earning.query.filter_by(game_id=gameID)
 	behaviors = Behavior.query.filter_by(game_id=gameID)
+	bankrolls = Bankroll.query.filter_by(game_id=gameID)
 	for url in urls:
 		db.session.delete(url)
 	for payment in payments:
@@ -530,6 +535,8 @@ def delete_game():
 		db.session.delete(earning)
 	for behavior in behaviors:
 		db.session.delete(behavior)
+	for bankroll in bankrolls:
+		db.session.delete(bankroll)
 	if game:
 		db.session.delete(game)
 	db.session.commit()
@@ -556,7 +563,7 @@ def profile():
 			
 			#get behavior stats
 			behaviors = Behavior.query.filter_by(player_id=player.id).all()
-			print(behaviors)
+			#print(behaviors)
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
 	return render_template("profile.html", user=current_user, player=player, net=net)
 	
@@ -626,6 +633,7 @@ def parse_log(csv_file):
 	playerJoinRegex = '^The player "(.*) @ (.*)" joined the game with a stack of (\d*(?:\.\d\d)?)'
 	playerQuitRegex = '^The player "(.*) @ (.*)" quits the game with a stack of (\d*(?:\.\d\d)?)'
 	sitStandRegex = '^The player "(.*) @ (.*)" (\w*)\s\w* with the stack of (\d*(?:\.\d\d)?)'
+	updateStackRegex = '^The admin updated the player "(.*) @ (.*)" stack from (\d+) to (\d+).'
 
 	# Hand regexes
 	beginHandRegex = "^-- starting hand #(\d*)  \(([a-zA-Z' ]*)\).*"
@@ -659,6 +667,8 @@ def parse_log(csv_file):
 	handNumber = 0
 	useCents = False
 	gameType = ""
+	bigBlind = 0
+	smallBlind = 0
 	sortedCSV = (sorted(csv_file, key = lambda i: i['order']))
 
 	for row in sortedCSV:
@@ -688,7 +698,17 @@ def parse_log(csv_file):
 			if re.findall("(\d*\.\d\d)", re.findall(adminApprovedRegex, row['entry'])[0][2]):
 				#if ((/(\d*\.\d\d)/).test(row['entry'].match(adminApprovedRegex)[0][2])){
 				useCents = True
-			
+		elif re.search(updateStackRegex, row['entry']):
+			adminActions.append({
+				'action': 'updatedStack',
+				'player': re.findall(updateStackRegex, row['entry'])[0][0],
+				'playerId': re.findall(updateStackRegex, row['entry'])[0][1],
+				'from': float(re.findall(updateStackRegex, row['entry'])[0][2]),
+				'to': float(re.findall(updateStackRegex, row['entry'])[0][3]),
+				'at': row['at'],
+				'order': row['order'],
+				'originalEntry': row['entry']
+			})
 		elif re.search(seatRequestRegex, row['entry']):
 			adminActions.append({
 				'action': 'seatRequest',
@@ -780,6 +800,10 @@ def parse_log(csv_file):
 			})
 		
 		elif re.search(blindRegex, row['entry']):
+			if re.findall(blindRegex, row['entry'])[0][2] == 'big':
+				bigBlind = re.findall(blindRegex, row['entry'])[0][3]
+			elif re.findall(blindRegex, row['entry'])[0][2] == 'small':
+				smallBlind = re.findall(blindRegex, row['entry'])[0][3]
 			hands.append({
 				'handNumber': handNumber,
 				'player': re.findall(blindRegex, row['entry'])[0][0],
@@ -928,7 +952,9 @@ def parse_log(csv_file):
 		'stacks': stacks,
 		'adminActions': adminActions,
 		'unparsedLogEntries': unparsedLogEntries,
-		'gameType' : gameType
+		'gameType' : gameType,
+		'bigBlind' : bigBlind,
+		'smallBlind' : smallBlind
 	}
 
 def parseBehavior(pokerGame, game_id, stripped_filename):
@@ -1242,7 +1268,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		#run counts on each of the lists of names
 		for each in [*set(preflopPlayed)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'], hand['numPlayers'])
-			allPlayerActions[findPlayerIndexByKey('names', each)]['duration_played'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsPlayed'], hand['numPlayers'], int(hand['handDuration']))
+			allPlayerActions[findPlayerIndexByKey('names', each)]['duration_played'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['duration_played'], hand['numPlayers'], int(hand['handDuration']))
 		for each in [*set(preflopParticipated)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsParticipated'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['pre_handsParticipated'], hand['numPlayers'])
 		for each in [*set(preflopRaised)]:
@@ -1313,13 +1339,136 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	for i, url in enumerate(urls):
 		if stripped_filename in url.url:
 			which_url = i
+	
+	####################################################################################################################################################
+	#####SEARCH LEDGER AGAIN FOR BUY IN/OUT/NET
+	####################################################################################################################################################
+	csv_dicts = []
+	#####################################
+	#GAME SETUP
+	#####################################
+	game_url = urls[which_url].url
+	game_url_split = game_url.split('/')
+	game_code = game_url_split[-1]
+	ledger_url = game_url + '/ledger_' + game_code + '.csv'
+
+	#####################################
+	#LOAD THE GAME, ERROR IF FAILED
+	#####################################
+	try:
+		r = requests.get(ledger_url, verify=False, timeout=10)
+		r.raise_for_status()
+	except: #(RuntimeError, TypeError, NameError):
+		flash("There was an error loading loading the ledger.", category="error")
+		return render_template("import_log.html", user=current_user)
+	if r.status_code != 200:
+		flash("There was an error loading importing the game2.", category="error")
+		return render_template("import_log.html", user=current_user)
+
+	#####################################
+	#GAME LOADED
+	#####################################
+
+	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+		
+	#####################################
+	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
+	#####################################
+	game_date = csv_dicts[0][0]['session_start_at']
+	
+	def findPlayerIndexByKeyLog(PNDictionary, key, val):
+		for i, dic in enumerate(PNDictionary):
+			if isinstance(dic[key], list):
+				if val in dic[key]:
+					return i
+			else:
+				if val == dic[key]:
+					return i
+		return -1
+
+	PNDictionary = []
+	for each_dict in csv_dicts:
+		for row in each_dict:
+			playerIndex = findPlayerIndexByKeyLog(PNDictionary, 'pn_player_id', row['player_id'])
+			if playerIndex >= 0:
+				#player ID exists, add to it
+				PNDictionary[playerIndex]['net'] += int(row['net'])
+				PNDictionary[playerIndex]['buy_in'] += int(row['buy_in'])
+				PNDictionary[playerIndex]['cash_out'] += int(row['buy_in']) + int(row['net'])
+				if row['player_nickname'] not in PNDictionary[playerIndex]['player_nickname']:
+					PNDictionary[playerIndex]['player_nickname'].append(row['player_nickname'])
+			else:
+				#add new player
+				PNDictionary.append({
+					'pn_player_id': [row['player_id']],
+					'player_nickname': [row['player_nickname']],
+					'net' : float(row['net']),
+					'buy_in' : float(row['buy_in']),
+					'cash_out' : float(row['buy_in']) + float(row['net']),
+					'player_id' : None
+					})
+
+	#####################################
+	#LOOP OVER THE DEBT DICT TO MATCH DATABASE PLAYERS OR SUBMITTED DATA
+	#####################################
+	for x,debt in enumerate(PNDictionary):
+		#print(debt)
+		pokernow_id = PokernowId.query.filter_by(pn_id=debt['pn_player_id'][0]).first()
+		alias = Alias.query.filter_by(alias=debt['player_nickname'][0]).first()
+		if pokernow_id:
+			debt['player_id'] = pokernow_id.player_id
+		elif alias:
+			debt['player_id'] = alias.player_id
+		else:
+			debt['player_id'] = None
+
+	finalLedger = []
+	for debt in PNDictionary:
+		playerIndex = findPlayerIndexByKeyLog(finalLedger, 'player_id', debt['player_id'])
+		if playerIndex >= 0:
+			for eachID in debt['pn_player_id']:
+				if eachID not in finalLedger[playerIndex]['pn_player_id']:
+					finalLedger[playerIndex]['pn_player_id'].append(eachID)
+			
+			for eachNickname in debt['player_nickname']:
+				if eachNickname not in finalLedger[playerIndex]['player_nickname']:
+					finalLedger[playerIndex]['player_nickname'].append(eachNickname)
+			finalLedger[playerIndex]['net'] += debt['net']
+			finalLedger[playerIndex]['buy_in'] += debt['buy_in']
+			finalLedger[playerIndex]['cash_out'] += debt['cash_out']
+		else:
+			finalLedger.append(debt)
+	
+	from datetime import datetime, timedelta
+	
+	game_date_utc = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0)
+	delta = timedelta(hours=9)
+	game_date_est = game_date_utc - delta
+
+	for eachLedger in finalLedger:
+		#####################################
+		#ADD BANKROLL RECORDS
+		#####################################
+		bankroll = Bankroll.query.filter_by(game_id=game_id, player_id=eachLedger['player_id']).first()
+		if not bankroll:
+			new_bankroll = Bankroll(
+				game_id=game_id,
+				url_id=urls[which_url].id,
+				date=game_date_est,
+				player_id=eachLedger['player_id'],
+				buyin=eachLedger['buy_in'],
+				cashout=eachLedger['cash_out'],
+				net=eachLedger['net'],
+				imported=False,
+				location='PokerNow'
+			)
+			db.session.add(new_bankroll)
+	db.session.flush()
 
 	for eachPlayer in allPlayerActions:
 		#print(eachPlayer)
 		if eachPlayer['player_id']:
 			behavior = Behavior.query.filter_by(player_id=eachPlayer['player_id'],game_id=game_id).all()
-			for each in behavior:
-				print(each.id)
 			if not behavior:
 				new_behavior = Behavior(
 					game_id=game_id,
@@ -1423,9 +1572,25 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 					ft_wtsd = eachPlayer['wtsd'][2],
 				)
 				db.session.add(new_behavior)
+				db.session.flush()
+
+				#update bankroll
+				bankroll = Bankroll.query.filter_by(game_id=game_id, player_id=eachPlayer['player_id']).first()
+				bankroll.behavior_id = Behavior.query.filter_by(url_id=urls[which_url].id, player_id=eachPlayer['player_id']).first().id
+				bankroll.duration=sum(eachPlayer['duration_played'])
+				bankroll.hands_played=sum(eachPlayer['pre_handsPlayed'])
+
+	
+
+
 
 	urls[which_url].imported = True
 	urls[which_url].game_type = pokerGame['gameType']
+	urls[which_url].big_blind = pokerGame['bigBlind']
+	urls[which_url].small_blind = pokerGame['smallBlind']
+	#for eachAction in pokerGame['adminActions']:
+	#	print(eachAction)
+	#print(pokerGame['adminActions'])
 	db.session.commit()
 
 	return allPlayerActions

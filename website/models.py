@@ -23,6 +23,7 @@ class Player(db.Model):
 	earnings = db.relationship('Earning', backref='player')
 	user = db.relationship('User', backref='player')
 	pokernowid = db.relationship('PokernowId', backref='player')
+	bankroll = db.relationship('Bankroll', backref='player')
 
 class Alias(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -51,6 +52,9 @@ class Url(db.Model):
 	imported = db.Column(db.Boolean, default=False)
 	behaviors = db.relationship('Behavior', backref='url')
 	game_type = db.Column(db.String(20))
+	small_blind = db.Column(db.Integer)
+	big_blind = db.Column(db.Integer)
+	bankrolls = db.relationship('Bankroll', backref='url')
 
 class Payment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -167,3 +171,19 @@ class Behavior(db.Model):
 	ft_fold_3bet = db.Column(db.Integer)
 	ft_call_raise_3bet = db.Column(db.Integer)
 	ft_wtsd = db.Column(db.Integer)
+	
+class Bankroll(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+	url_id = db.Column(db.Integer, db.ForeignKey('url.id'))
+	behavior_id = db.Column(db.Integer, db.ForeignKey('behavior.id'))
+	behavior = db.relationship('Behavior', backref='Bankroll')
+	imported = db.Column(db.Boolean, default=False)
+	date = db.Column(db.DateTime(timezone=True), default=func.now())
+	location = db.Column(db.String(200), default='PokerNow')
+	buyin = db.Column(db.Integer)
+	cashout = db.Column(db.Integer)
+	net = db.Column(db.Integer)
+	duration = db.Column(db.Integer)
+	hands_played = db.Column(db.Integer)
