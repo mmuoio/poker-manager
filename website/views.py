@@ -320,8 +320,6 @@ def link_players():
 				if eachNickname not in finalLedger[playerIndex]['player_nickname']:
 					finalLedger[playerIndex]['player_nickname'].append(eachNickname)
 			finalLedger[playerIndex]['net'] += debt['net']
-			finalLedger[playerIndex]['buy_in'] += debt['buy_in']
-			finalLedger[playerIndex]['cash_out'] += debt['cash_out']
 			finalLedger[playerIndex]['balance'] += debt['balance']
 		else:
 			finalLedger.append(debt)
@@ -1600,14 +1598,14 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 def player_stats():
 	user=current_user
 	player=null
-	net=0
 	if user.player_id:
 		#player = Player.query.filter_by(id=user.player_id).first()
 		player = Player.query.filter_by(id=28).first()
 		if player:
 			
 			#get behavior stats
-			behaviors = Behavior.query.filter_by(player_id=player.id).all()
+			#behaviors = Behavior.query.filter_by(player_id=player.id).all()
+			bankrolls = Bankroll.query.filter_by(player_id=player.id).all()
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
 				'pre_hands_participated' : [0,0,0,0],
@@ -1641,23 +1639,27 @@ def player_stats():
 				'wtsd' : [0,0,0,0],
 				}
 			
-
-			for behavior in behaviors:
+			for bankroll in bankrolls:
 				for each_behavior in player_behavior.keys():
 					#print(each_behavior)
-					x = eval('behavior.hu_'+each_behavior)
-					y = eval('behavior.sr_'+each_behavior)
-					z = eval('behavior.ft_'+each_behavior)
+					x = eval('bankroll.behavior.hu_'+each_behavior)
+					y = eval('bankroll.behavior.sr_'+each_behavior)
+					z = eval('bankroll.behavior.ft_'+each_behavior)
 					player_behavior[each_behavior][0] += x
 					player_behavior[each_behavior][1] += y
 					player_behavior[each_behavior][2] += z
 					player_behavior[each_behavior][3] += x+y+z
 
 			#print(player_behavior)
-				
+			winslosses = [0,0]
+			for bankroll in bankrolls:
+				if bankroll.net > 0:
+					winslosses[0] += 1
+				elif bankroll.net < 0:
+					winslosses[1] += 1
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
-	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior)
+	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, br=bankrolls, wl=winslosses)
 
 @views.route('/delete_log', methods=['GET'])
 def delete_log():
