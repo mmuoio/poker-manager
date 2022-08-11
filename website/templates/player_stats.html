@@ -20,7 +20,7 @@
 				<div class="card">
 					<div class="card-body">
 					<h5 class="card-title text-muted">Bankroll</h5>
-					<h3 class="mt-3 mb-3" style="text-align:center;">${{ br | sum(attribute="net")}}</h3>
+					<h3 class="mt-3 mb-3 {% if br | sum(attribute="net") > 0 %}text-success{% else %}text-danger {% endif %}" style="text-align:center;">${{ "{:,}".format(br | sum(attribute="net"))}}</h3>
 					</div>
 				</div>
 			  </div>
@@ -29,7 +29,7 @@
 				<div class="card">
 					<div class="card-body">
 					<h5 class="card-title text-muted">ROI</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{{ (((br | sum(attribute="net")) + (br | sum(attribute="buyin"))) /  (br | sum(attribute="buyin")) * 100) | round(2)}}%</h3>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{{ "{:,.2f}".format((((br | sum(attribute="net")) + (br | sum(attribute="buyin"))) /  (br | sum(attribute="buyin")) * 100) | round(2))}}%</h3>
 					</div> <!-- end card-body-->
 				</div> <!-- end card-->
 			</div> <!-- end col-->
@@ -52,11 +52,11 @@
 				<div class="card">
 					<div class="card-body">
 					<h5 class="card-title text-muted">Hands played</h5>
-					<h3 class="mt-3 mb-3" style="text-align:center;">{{pb['pre_hands_played'][3]}}</h3>
+					<h3 class="mt-3 mb-3" style="text-align:center;">{{ "{:,}".format(pb['pre_hands_played'][3]) }}</h3>
 					<div class="text-muted sub-card">
-						HU: {{pb['pre_hands_played'][0]}} |
-						SR: {{pb['pre_hands_played'][1]}} |
-						FT: {{pb['pre_hands_played'][2]}}
+						HU: {{"{:,}".format(pb['pre_hands_played'][0])}} |
+						SR: {{"{:,}".format(pb['pre_hands_played'][1])}} |
+						FT: {{"{:,}".format(pb['pre_hands_played'][2])}}
 					</div>
 					</div> <!-- end card-body-->
 				</div> <!-- end card-->
@@ -66,11 +66,11 @@
 				<div class="card">
 					<div class="card-body">
 					<h5 class="card-title text-muted">VPIP</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if pb['pre_hands_played'][3] == 0 %} -- {% else %} {{(pb['pre_hands_participated'][3]/pb['pre_hands_played'][3] * 100)|round(2)}}% <span class="text-muted" style="font-size:11pt">({{pb['pre_hands_participated'][3]}}/{{pb['pre_hands_played'][3]}})</span> {% endif %}</h3>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['pre_hands_played'][3]-pb['pre_hands_raised'][3]) == 0 %} -- {% else %} {{(pb['pre_hands_raised'][3]/(pb['pre_hands_played'][3]-pb['pre_hands_raised'][3]) * 100)|round(2)}}% <span class="text-muted" style="font-size:11pt">({{pb['pre_hands_participated'][3]}}/{{pb['pre_hands_played'][3]}})</span> {% endif %}</h3>
 						<div class="text-muted sub-card">
-							HU: {% if pb['pre_hands_played'][0] == 0 %} -- {% else %} {{(pb['pre_hands_participated'][0]/pb['pre_hands_played'][0] * 100)|round(1)}}% {% endif %} |
-							SR: {% if pb['pre_hands_played'][1] == 0 %} -- {% else %} {{(pb['pre_hands_participated'][1]/pb['pre_hands_played'][1] * 100)|round(1)}}% {% endif %} |
-							FT: {% if pb['pre_hands_played'][2] == 0 %} -- {% else %} {{(pb['pre_hands_participated'][2]/pb['pre_hands_played'][2] * 100)|round(1)}}% {% endif %}
+							HU: {% if (pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) == 0 %} -- {% else %} {{(pb['pre_hands_raised'][0]/(pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) == 0 %} -- {% else %} {{(pb['pre_hands_raised'][1]/(pb['pre_hands_played'][1]-pb['pre_hands_raised'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) == 0 %} -- {% else %} {{(pb['pre_hands_raised'][2]/(pb['pre_hands_played'][2]-pb['pre_hands_raised'][2]) * 100)|round(1)}}% {% endif %}
 						</div>
 					</div> <!-- end card-body-->
 				</div> <!-- end card-->
@@ -117,6 +117,132 @@
 					</div> <!-- end card-body-->
 				</div> <!-- end card-->
 			</div> <!-- end col-->
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Double Barrel (2B)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['2barrel'][3]+pb['2barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['2barrel'][3]/(pb['2barrel'][3]+pb['2barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['2barrel'][0]+pb['2barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['2barrel'][0]/(pb['2barrel'][0]+pb['2barrel_check_fold'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['2barrel'][1]+pb['2barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['2barrel'][1]/(pb['2barrel'][1]+pb['2barrel_check_fold'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['2barrel'][2]+pb['2barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['2barrel'][2]/(pb['2barrel'][2]+pb['2barrel_check_fold'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Triple Barrel (3Ba)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3barrel'][3]+pb['3barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['3barrel'][3]/(pb['3barrel'][3]+pb['3barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['3barrel'][0]+pb['3barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['3barrel'][0]/(pb['3barrel'][0]+pb['3barrel_check_fold'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['3barrel'][1]+pb['3barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['3barrel'][1]/(pb['3barrel'][1]+pb['3barrel_check_fold'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['3barrel'][2]+pb['3barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['3barrel'][2]/(pb['3barrel'][2]+pb['3barrel_check_fold'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">3 Bet Preflop (3B)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3bet'][3]+pb['no_3bet'][3]) == 0 %} -- {% else %} {{(pb['3bet'][3]/(pb['3bet'][3]+pb['no_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['3bet'][0]+pb['no_3bet'][0]) == 0 %} -- {% else %} {{(pb['3bet'][0]/(pb['3bet'][0]+pb['no_3bet'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['3bet'][1]+pb['no_3bet'][1]) == 0 %} -- {% else %} {{(pb['3bet'][1]/(pb['3bet'][1]+pb['no_3bet'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['3bet'][2]+pb['no_3bet'][2]) == 0 %} -- {% else %} {{(pb['3bet'][2]/(pb['3bet'][2]+pb['no_3bet'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">4 Bet Preflop (4B)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['4bet'][3]+pb['no_4bet'][3]) == 0 %} -- {% else %} {{(pb['4bet'][3]/(pb['4bet'][3]+pb['no_4bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['4bet'][0]+pb['no_4bet'][0]) == 0 %} -- {% else %} {{(pb['4bet'][0]/(pb['4bet'][0]+pb['no_4bet'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['4bet'][1]+pb['no_4bet'][1]) == 0 %} -- {% else %} {{(pb['4bet'][1]/(pb['4bet'][1]+pb['no_4bet'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['4bet'][2]+pb['no_4bet'][2]) == 0 %} -- {% else %} {{(pb['4bet'][2]/(pb['4bet'][2]+pb['no_4bet'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Fold to Cbet (FC)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) == 0 %} -- {% else %} {{(pb['fold_cbet'][3]/(pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) == 0 %} -- {% else %} {{(pb['fold_cbet'][0]/(pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) == 0 %} -- {% else %} {{(pb['fold_cbet'][1]/(pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) == 0 %} -- {% else %} {{(pb['fold_cbet'][2]/(pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Fold to 2 Barrel (F2B)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_2b'][3]+pb['call_raise_2b'][3]) == 0 %} -- {% else %} {{(pb['fold_2b'][3]/(pb['fold_2b'][3]+pb['call_raise_2b'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['fold_2b'][0]+pb['call_raise_2b'][0]) == 0 %} -- {% else %} {{(pb['fold_2b'][0]/(pb['fold_2b'][0]+pb['call_raise_2b'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['fold_2b'][1]+pb['call_raise_2b'][1]) == 0 %} -- {% else %} {{(pb['fold_2b'][1]/(pb['fold_2b'][1]+pb['call_raise_2b'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['fold_2b'][2]+pb['call_raise_2b'][2]) == 0 %} -- {% else %} {{(pb['fold_2b'][2]/(pb['fold_2b'][2]+pb['call_raise_2b'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Fold to 3 Barrel (F3Ba)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3b'][3]+pb['call_raise_3b'][3]) == 0 %} -- {% else %} {{(pb['fold_3b'][3]/(pb['fold_3b'][3]+pb['call_raise_3b'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['fold_3b'][0]+pb['call_raise_3b'][0]) == 0 %} -- {% else %} {{(pb['fold_3b'][0]/(pb['fold_3b'][0]+pb['call_raise_3b'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['fold_3b'][1]+pb['call_raise_3b'][1]) == 0 %} -- {% else %} {{(pb['fold_3b'][1]/(pb['fold_3b'][1]+pb['call_raise_3b'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['fold_3b'][2]+pb['call_raise_3b'][2]) == 0 %} -- {% else %} {{(pb['fold_3b'][2]/(pb['fold_3b'][2]+pb['call_raise_3b'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Fold to 3 Bet (F3B)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) == 0 %} -- {% else %} {{(pb['fold_3bet'][3]/(pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) == 0 %} -- {% else %} {{(pb['fold_3bet'][0]/(pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) == 0 %} -- {% else %} {{(pb['fold_3bet'][1]/(pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['fold_3bet'][2]+pb['call_raise_3bet'][2]) == 0 %} -- {% else %} {{(pb['fold_3bet'][2]/(pb['fold_3bet'][2]+pb['call_raise_3b'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3 col-xl-3 col-lg-3">
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title text-muted">Showdown % (WTSD)</h5>
+						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['post_hands_played'][3]) == 0 %} -- {% else %} {{(pb['wtsd'][3]/(pb['post_hands_played'][3]) * 100)|round(2)}}% {% endif %}</h3>
+						<div class="text-muted sub-card">
+							HU: {% if (pb['post_hands_played'][0]) == 0 %} -- {% else %} {{(pb['wtsd'][0]/(pb['post_hands_played'][0]) * 100)|round(1)}}% {% endif %} |
+							SR: {% if (pb['post_hands_played'][1]) == 0 %} -- {% else %} {{(pb['wtsd'][1]/(pb['post_hands_played'][1]) * 100)|round(1)}}% {% endif %} |
+							FT: {% if (pb['post_hands_played'][2]) == 0 %} -- {% else %} {{(pb['wtsd'][2]/(pb['post_hands_played'][2]) * 100)|round(1)}}% {% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
 
 			
 

@@ -1164,16 +1164,16 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				bet3CallRaise.append(action['player'])
 
 			#3 bet
-			if lastAction == 'bets' and action['action'] == 'raises to':
+			if lastAction == 'raises to' and action['action'] == 'raises to' and betCount == 3:
 				preflop3bet.append(action['player'])
-				last3Bet = True
-			elif lastAction == 'bets' and action['action'] != 'raises to':
+				#last3Bet = True
+			elif lastAction == 'raises to' and action['action'] != 'raises to' and betCount == 2:
 				preflopNo3bet.append(action['player'])
 
 			#4 bet
-			elif lastAction == 'raises to' and action['action'] == 'raises to' and last3Bet:
+			elif lastAction == 'raises to' and action['action'] == 'raises to' and betCount == 4:
 				preflop4bet.append(action['player'])
-			elif lastAction == 'raises to' and action['action'] != 'raises to' and last3Bet:
+			elif lastAction == 'raises to' and action['action'] != 'raises to' and betCount == 3:
 				preflopNo4bet.append(action['player'])
 			lastAction = action['action']
 		
@@ -1329,8 +1329,8 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		for each in [*set(wtsd)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'], hand['numPlayers'])
 
-	#for each in allPlayerActions:
-	#	print(each)
+	for each in allPlayerActions:
+		print(each)
 	urls = Url.query.filter_by(game_id=game_id).all()
 	which_url = None
 	for i, url in enumerate(urls):
@@ -1588,7 +1588,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#for eachAction in pokerGame['adminActions']:
 	#	print(eachAction)
 	#print(pokerGame['adminActions'])
-	db.session.commit()
+	#db.session.commit()
 
 	return allPlayerActions
 
@@ -1600,7 +1600,10 @@ def player_stats():
 	player=null
 	if user.player_id:
 		#player = Player.query.filter_by(id=user.player_id).first()
-		player = Player.query.filter_by(id=28).first()
+		player = Player.query.filter_by(id=28).first()	#MG
+		#player = Player.query.filter_by(id=13).first()	#Fluffy
+		#player = Player.query.filter_by(id=14).first()	#Gocha
+		
 		if player:
 			
 			#get behavior stats
