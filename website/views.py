@@ -1640,6 +1640,7 @@ def player_stats():
 				'fold_3bet' : [0,0,0,0],
 				'call_raise_3bet' : [0,0,0,0],
 				'wtsd' : [0,0,0,0],
+				'duration_played' : [0,0,0,0],
 				}
 			
 			for bankroll in bankrolls:
