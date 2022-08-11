@@ -1588,7 +1588,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#for eachAction in pokerGame['adminActions']:
 	#	print(eachAction)
 	#print(pokerGame['adminActions'])
-	#db.session.commit()
+	db.session.commit()
 
 	return allPlayerActions
 
@@ -1671,9 +1671,12 @@ def delete_log():
 	
 	url = Url.query.filter_by(id=urlID).first()
 	behaviors = Behavior.query.filter_by(url_id=urlID).all()
+	bankrolls = Bankroll.query.filter_by(url_id=urlID).all()
 	url.imported = False
 	for behavior in behaviors:
 		db.session.delete(behavior)
+	for bankroll in bankrolls:
+		db.session.delete(bankroll)
 	db.session.commit()
 	#games = Game.query.all()
 	#return render_template("games.html", user=current_user, games=games)
