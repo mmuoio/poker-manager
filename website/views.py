@@ -633,7 +633,7 @@ def parse_log(csv_file):
 	updateStackRegex = '^The admin updated the player "(.*) @ (.*)" stack from (\d+) to (\d+).'
 
 	# Hand regexes
-	beginHandRegex = "^-- starting hand #(\d*)  \(([a-zA-Z' ]*)\).*"
+	beginHandRegex = "^-- starting hand #(\d*)  \(([a-zA-Z'0-9\/ ]*)\).*"
 	yourHandRegex = '^Your hand is (.*)'
 	blindRegex = '^"(.*) @ (.*)" posts a (?:\\bmissed\\b\s|\\bmissing\\b\s)?(\\bbig\\b|\\bsmall\\b) blind of (\d*(?:\.\d\d)?)'
 	straddleRegex = '^"(.*) @ (.*)" posts a straddle of (\d*(?:\.\d\d)?)'
@@ -1610,6 +1610,7 @@ def player_stats():
 			#get behavior stats
 			#behaviors = Behavior.query.filter_by(player_id=player.id).all()
 			bankrolls = Bankroll.query.filter_by(player_id=player.id).all()
+			print(bankrolls)
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
 				'pre_hands_participated' : [0,0,0,0],
@@ -1655,7 +1656,7 @@ def player_stats():
 					player_behavior[each_behavior][2] += z
 					player_behavior[each_behavior][3] += x+y+z
 
-			print(player_behavior)
+			#print(player_behavior)
 			winslosses = [0,0]
 			for bankroll in bankrolls:
 				if bankroll.net > 0:

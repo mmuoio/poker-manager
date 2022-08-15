@@ -41,3 +41,8 @@ body{
 .card-title{
 	font-weight: normal;
 }
+
+.player_link_dropdown[data-chosen='-1']:not(:focus){
+	background-color: #3fa76c;
+	color: #fff;
+}

@@ -327,7 +327,7 @@
 {% for br in bankrolls %}
 	<div class="row bankRollRow" id="expandRow{{br.id}}">
 		<div class="col-3">{{br.date.strftime('%a, %b %d, %Y')}}</div>
-		<div class="col-2">1/2 NLHE</div>
+		<div class="col-2">{{br.url.small_blind}}/{{br.url.big_blind}} {{br.url.game_type}}</div>
 		<div class="col-2">{{seconds_to_hours_minutes(br.duration)}}</div>
 		<div class="col-2">{{ "{:,}".format(br.behavior.hu_pre_hands_played+br.behavior.sr_pre_hands_played+br.behavior.ft_pre_hands_played) }}</div>
 		<!--<td align="center">{{br.location}}</td>-->

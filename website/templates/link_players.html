@@ -14,7 +14,7 @@
 		{{', '.join(pn_player.player_nickname)}}
 	  </div>
 	  <div class="col">
-		<select name="player_link" class="form-select mb-2" >
+		<select name="player_link" class="form-select mb-2 player_link_dropdown" onchange="this.dataset.chosen = this.value;">
 			<option value="-1">Select player</option>
 			{% if players %}
 			{% for player in players %}
@@ -52,5 +52,13 @@
 	</div>
 	</div>
 </form>
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		$('.player_link_dropdown').change();
+
+		
+	});
+  </script>
 
 {% endblock %}

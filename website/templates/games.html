@@ -24,7 +24,11 @@
 				{% endfor %}
 			</td>
 			<td align="center" style="vertical-align: middle;">
-				{{ game.urls.game_type|join(', ')}}
+				{% for url in game.urls %}
+				{% if url.game_type %}
+				{{ url.game_type}}{% if not loop.last %}<br/>{% endif %}
+				{% endif %}
+				{% endfor %}
 			</td>
 			{% if user and user.is_authenticated and user.admin %}
 			<td align="center" style="vertical-align: middle;">

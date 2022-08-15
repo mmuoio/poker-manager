@@ -54,7 +54,6 @@ class Url(db.Model):
 	game_type = db.Column(db.String(20))
 	small_blind = db.Column(db.Integer)
 	big_blind = db.Column(db.Integer)
-	bankrolls = db.relationship('Bankroll', backref='url')
 
 class Payment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -177,6 +176,7 @@ class Bankroll(db.Model):
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 	url_id = db.Column(db.Integer, db.ForeignKey('url.id'))
+	url = db.relationship('Url', backref='Bankroll')
 	behavior_id = db.Column(db.Integer, db.ForeignKey('behavior.id'))
 	behavior = db.relationship('Behavior', backref='Bankroll')
 	imported = db.Column(db.Boolean, default=False)
