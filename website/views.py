@@ -1158,7 +1158,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				preflopParticipated.append(action['player'])
 			
 			#reaction to 3 bet
-			if action['action'] == 'fold' and betCount == 3:
+			if action['action'] == 'folds' and betCount == 3:
 				bet3Fold.append(action['player'])
 			elif action['action'] == 'raises to' and betCount == 3:
 				bet3CallRaise.append(action['player'])
@@ -1254,7 +1254,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				barrel3Fold.append(action['player'])
 			if action['action'] in ['calls', 'raises to'] and lastBarrel3:
 				barrel3CallRaise.append(action['player'])
-			if action['action'] == 'fold':
+			if action['action'] == 'folds':
 				updatedShowdown = [value for value in showdownPlayers if value != action['player']]
 				showdownPlayers = updatedShowdown
 			lastAction = action['action']
@@ -1329,8 +1329,8 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		for each in [*set(wtsd)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'], hand['numPlayers'])
 
-	for each in allPlayerActions:
-		print(each)
+	#for each in allPlayerActions:
+	#	print(each)
 	urls = Url.query.filter_by(game_id=game_id).all()
 	which_url = None
 	for i, url in enumerate(urls):
@@ -1437,7 +1437,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 			finalLedger.append(debt)
 	
 	from datetime import datetime, timedelta
-	print(csv_dicts[0][0])
+	#print(csv_dicts[0][0])
 	game_date_utc = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0)
 	delta = timedelta(hours=9)
 	game_date_est = game_date_utc - delta
@@ -1599,10 +1599,11 @@ def player_stats():
 	user=current_user
 	player=null
 	if user.player_id:
-		#player = Player.query.filter_by(id=user.player_id).first()
+		player = Player.query.filter_by(id=user.player_id).first()
 		player = Player.query.filter_by(id=28).first()	#MG
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
+		#player = Player.query.filter_by(id=20).first()	#Josh
 		
 		if player:
 			
@@ -1654,7 +1655,7 @@ def player_stats():
 					player_behavior[each_behavior][2] += z
 					player_behavior[each_behavior][3] += x+y+z
 
-			#print(player_behavior)
+			print(player_behavior)
 			winslosses = [0,0]
 			for bankroll in bankrolls:
 				if bankroll.net > 0:
@@ -1663,7 +1664,7 @@ def player_stats():
 					winslosses[1] += 1
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
-	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, br=bankrolls, wl=winslosses)
+	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses)
 
 @views.route('/delete_log', methods=['GET'])
 def delete_log():
