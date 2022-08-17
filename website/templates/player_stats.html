@@ -4,13 +4,37 @@
 {% block content %}
 <br/>
 <div class="profile-icon" style="float: left;margin-right:15px;"><i class="fa fa-user-circle fa-4x" aria-hidden="true"></i></div>
-	<div style="font-size: 16pt;">
-		<b>{{user.first_name}} {{user.last_name}}</b><br/>
-		{{user.email}}
-   </div>
-   <hr/>
+<div style="font-size: 16pt;">
+	<b>{{user.first_name}} {{user.last_name}}</b><br/>
+	{{user.email}}
+</div>
 
-   <h3 style="padding-left: 6px;">Dashboard</h3>
+<hr/>
+
+<div class="float-end" style="margin-right:10px">
+	<a href="#" id="popover" class="btn btn-primary" data-bs-placement="bottom"><i class="fa fa-filter" aria-hidden="true"></i></a>
+	<div id="popover-content" style="display: none;">
+		<form class="form" method="post" style="font-size:17px">
+			<div class="form-check form-switch mb-3">
+			<input type="checkbox" name="filter_nlhe" class="form-control form-check-input" role="switch" {% if nlhe %}checked{% endif %}> <label for="filter_nlhe">NLHE</label>
+			</div>
+			<div class="form-check form-switch mb-3">
+			<input type="checkbox" name="filter_plo" class="form-control form-check-input" role="switch" {% if plo %}checked{% endif %}> <label for="filter_nlhe">PLO</label>
+			</div>
+			<div class="form-check form-switch mb-3">
+			<input type="checkbox" name="filter_plo8" class="form-control form-check-input" role="switch" {% if plo8 %}checked{% endif %}> <label for="filter_nlhe">PLO8</label>
+			</div>
+			<div class="mb-3">
+			<button type="submit" class="btn btn-primary">Filter</button>
+
+			<a href="player_stats" class="btn btn-secondary">Clear</a>
+			</div>
+		</form>
+	</div>
+	</div>
+<h3 style="padding-left: 6px;">Dashboard</h3>
+
+
 <div class="row">
 	<div class="col-xl-12 col-lg-6">
 
@@ -439,7 +463,15 @@
 	$(document).ready(function () {
 		$('.bankRollRow').on('click',function(){
 			$(this).next('.collapse').toggle({toggle:true})
-		})
+		});
+
+		$('#popover').popover({ 
+			html : true,
+			sanitize: false,
+			title: 'Filter',
+			content:  $("#popover-content").html(),
+			
+		});
 	});
   </script>
 

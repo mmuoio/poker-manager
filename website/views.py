@@ -1627,13 +1627,28 @@ def player_stats():
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
 		#player = Player.query.filter_by(id=20).first()	#Josh
+
+
+		if request.method == 'POST':
+			nlhe = request.form.get('filter_nlhe')
+			plo = request.form.get('filter_plo')
+			plo8 = request.form.get('filter_plo8')
+			game_type_filter = []
+			if nlhe: game_type_filter.append('NLHE')
+			if plo: game_type_filter.append('PLO')
+			if plo8: game_type_filter.append('PLO8')
+		else:
+			nlhe = True
+			plo = True
+			plo8 = True
+			game_type_filter = ['NLHE', 'PLO', 'PLO8']
+		print(plo)
 		
 		if player:
-			
 			#get behavior stats
-			#behaviors = Behavior.query.filter_by(player_id=player.id).all()
-			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
-			print(bankrolls)
+			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
+			bankrolls = Bankroll.query.filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
+			#print(bankrolls)
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
 				'pre_hands_participated' : [0,0,0,0],
@@ -1688,7 +1703,7 @@ def player_stats():
 					winslosses[1] += 1
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
-	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses)
+	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8)
 
 @views.route('/delete_log', methods=['GET'])
 def delete_log():
