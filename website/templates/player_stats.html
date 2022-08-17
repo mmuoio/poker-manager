@@ -340,17 +340,22 @@
 
 <div class="container">
 	<div class="row">
-		<div class="col-3 bankRollHeader">DATE</div>
+		<div class="col-2 bankRollHeader">DATE</div>
 		<div class="col-2 bankRollHeader">GAME</div>
 		<div class="col-2 bankRollHeader">DURATION</div>
 		<div class="col-2 bankRollHeader"># HANDS</div>
 		<div class="col-1 bankRollHeader">$ IN</div>
 		<div class="col-1 bankRollHeader">$ OUT</div>
 		<div class="col-1 bankRollHeader">NET</div>
+		<div class="col-1 bankRollHeader">BALANCE</div>
 	</div>
+	{% set ns = namespace(balance=(bankrolls | sum(attribute="net"))) %}
 {% for br in bankrolls %}
+	{% if not loop.first %}
+	{% set ns.balance=(ns.balance-br.net) %}
+	{% endif %}
 	<div class="row bankRollRow" id="expandRow{{br.id}}">
-		<div class="col-3">{{br.date.strftime('%a, %b %d, %Y')}}</div>
+		<div class="col-2">{{br.date.strftime('%a, %b %d, %Y')}}</div>
 		<div class="col-2">{{br.url.small_blind}}/{{br.url.big_blind}} {{br.url.game_type}}</div>
 		<div class="col-2">{{seconds_to_hours_minutes(br.duration)}}</div>
 		<div class="col-2">{{ "{:,}".format(br.behavior.hu_pre_hands_played+br.behavior.sr_pre_hands_played+br.behavior.ft_pre_hands_played) }}</div>
@@ -358,6 +363,7 @@
 		<div class="col-1">{{format_dollar(br.buyin)}}</div>
 		<div class="col-1">{{format_dollar(br.cashout)}}</div>
 		<div class="col-1 {% if (br.net > 0) %}text-success{% elif br.net < 0%}text-danger{% endif %}">{{format_dollar(br.net)}}</div>
+		<div class="col-1 {% if (ns.balance > 0) %}text-success{% elif ns.balance < 0%}text-danger{% endif %}">{{format_dollar(ns.balance)}}</div>
 
 
 		
