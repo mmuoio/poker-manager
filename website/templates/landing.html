@@ -20,16 +20,21 @@
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"
         ></script>
+		<link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/cover/">
     <title>{% block title %}Home{% endblock %}</title>
     </head>
-    <body class="body">
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #3fa76c;">
-            <div class="container-fluid" style="max-width: 1140px;margin-right:auto;margin-left:auto">
+
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #3fa76c;
+		text-shadow: 0 .1rem .1rem rgba(19, 19, 19, 0.5);
+		box-shadow: inset 0 0 1rem rgba(9, 43, 8, 0.5);">
+            <div class="container-fluid" style="margin-right:auto;margin-left:auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
-                <a class="navbar-brand" href="/">&spades; POKER MANAGER</a>
+                <a class="navbar-brand" href="/">&spades; 69 SOCIETY</a>
                 <div class="collapse navbar-collapse justify-content-start" id="mainNavbar">
                     <div class="navbar-nav">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -41,7 +46,7 @@
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/games"><i class="fa fa-database" aria-hidden="true"></i><Br/>Games</a></li>
                             {% if user and  user.is_authenticated and user.player_id %}
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-pie-chart" aria-hidden="true"></i><br/>Stats</a></li>
-                            <!--<li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-usd" aria-hidden="true"></i><br/>Bankroll</a></li>-->
+                            <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-usd" aria-hidden="true"></i><br/>Bankroll</a></li>
                             {% endif %}
                         </ul>
                     </div>
@@ -93,9 +98,99 @@
         {% endwith %}
 
 
-        <br/>
 
-        <div class="container h-100 body_container" style="max-width:1140px; background-color: #fff;">
+		<style>
+
+			/*
+ * Globals
+ */
+
+
+/* Custom default button */
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  color: #333;
+  text-shadow: none; /* Prevent inheritance from `body` */
+}
+
+
+/*
+ * Base structure
+ */
+
+.cover-container {
+  text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+  box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+  background-image: url('static/coverphotos/pexels-pixabay-269630.jpg');
+  background-size: cover;
+}
+
+body{
+	background-color:rgb(27, 27, 27);
+}
+
+
+
+
+/*
+ * Header
+ */
+
+.nav-masthead .nav-link {
+  color: rgba(255, 255, 255, .5);
+  border-bottom: .25rem solid transparent;
+}
+
+.nav-masthead .nav-link:hover,
+.nav-masthead .nav-link:focus {
+  border-bottom-color: rgba(255, 255, 255, .25);
+}
+
+.nav-masthead .nav-link + .nav-link {
+  margin-left: 1rem;
+}
+
+.nav-masthead .active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+			.bd-placeholder-img {
+			  font-size: 1.125rem;
+			  text-anchor: middle;
+			  -webkit-user-select: none;
+			  -moz-user-select: none;
+			  user-select: none;
+			}
+	  
+			@media (min-width: 768px) {
+			  .bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			  }
+			}
+	  
+	  
+		  </style>
+
+		<div class="cover-container d-flex w-100 h-100  flex-column">
+
+			<div style="background-color: gray;" class="w-25 px-5 py-5">
+				<div >
+				<h1>Do you 69?</h1>
+				<p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
+				</div>
+			
+				<footer class="mt-auto text-white-50">
+				<p>Cover template for <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a>, by <a href="https://twitter.com/mdo" class="text-white">@mdo</a>.</p>
+				</footer>
+			</div>
+		</div>
+
+
+
+
+
+        <div class="container" >
             {% block content %}
             
             {% endblock %}

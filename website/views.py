@@ -9,9 +9,26 @@ from io import StringIO
 
 views = Blueprint('views', __name__)
 
-@views.route('/', methods=['GET', 'POST'])
+@views.route('/home', methods=['GET', 'POST'])
 #@login_required
 def home():
+	# if request.method == 'POST':
+	# 	note = request.form.get('note')
+
+	# 	if len(note) < 1:
+	# 		flash('Note is too short.', category='error')
+	# 	else:
+	# 		new_note = Note(data=note, user_id=current_user.id)
+	# 		db.session.add(new_note)
+	# 		db.session.commit()
+	# 		flash('Note added!', category='success')
+	return render_template("home.html")
+
+
+
+@views.route('/', methods=['GET', 'POST'])
+#@login_required
+def index():
 	# if request.method == 'POST':
 	# 	note = request.form.get('note')
 
@@ -575,30 +592,36 @@ def import_log():
 	if request.method == 'POST':
 		from werkzeug.utils import secure_filename
 		from werkzeug.datastructures import  FileStorage
-		f = request.files['file']
-		file_name = "website\\static\\uploads\logs\\" + secure_filename(f.filename)
-		
-		urls = []
-		for url in game.urls:
-			if not url.imported:
-				split_url = url.url.split('/')
-				urls.append(split_url[-1])
-		stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
-		if stripped_filename in urls:
-			f.save(file_name)
-			print('file uploaded successfully')
+		files = request.files.getlist('file[]')
+		#print(files)
+		#for f in files:
+		#	print(secure_filename(f.filename))
+		#return True
+		for f in files:
 
-			parsedLog = parse_log(file_name)
+			file_name = "website\\static\\uploads\logs\\" + secure_filename(f.filename)
 			
-			
-			behavior = parseBehavior(parsedLog, game_id, stripped_filename)
-			#for each in behavior:
-			#	print(each)
-			if len(behavior) > 0:
-				import os
-				os.remove(file_name)
-		else:
-			flash("That file does not belong to this game or has already been uploaded.", category="error")
+			urls = []
+			for url in game.urls:
+				if not url.imported:
+					split_url = url.url.split('/')
+					urls.append(split_url[-1])
+			stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
+			if stripped_filename in urls:
+				f.save(file_name)
+				#print('file uploaded successfully')
+
+				parsedLog = parse_log(file_name)
+				
+				
+				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
+				#for each in behavior:
+				#	print(each)
+				if len(behavior) > 0:
+					import os
+					os.remove(file_name)
+			else:
+				flash("That file does not belong to this game or has already been uploaded.", category="error")
 
 
 
@@ -1609,7 +1632,7 @@ def player_stats():
 			
 			#get behavior stats
 			#behaviors = Behavior.query.filter_by(player_id=player.id).all()
-			bankrolls = Bankroll.query.filter_by(player_id=player.id).all()
+			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
 			print(bankrolls)
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],

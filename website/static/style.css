@@ -1,4 +1,4 @@
-body{
+.body{
 	height: 100%;
 	background-image: url('card_suits4.png');
 }
@@ -44,5 +44,9 @@ body{
 
 .player_link_dropdown[data-chosen='-1']:not(:focus){
 	background-color: #3fa76c;
+	color: #fff;
+}
+
+.nav-link{
 	color: #fff;
 }

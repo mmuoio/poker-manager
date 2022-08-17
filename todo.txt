@@ -18,8 +18,6 @@ Profile
 	payment history
 
 Log importing
-	What to do about double URL games?
-	Parse game type from log
 	Store hands as strings
 
 	log parse:
@@ -29,3 +27,12 @@ Log importing
 
 BB Jackpot
 Convert to other poker formats
+
+
+Tab out stats/bankroll
+Home page redesign
+Paginate games/bankroll
+Login page simplification
+Add log import button to settlement page
+Log import button disabled after importing
+Batch reload logs

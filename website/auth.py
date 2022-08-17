@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
+from .models import User, Player
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
@@ -40,6 +40,7 @@ def sign_up():
 		last_name = data.get('lastName')
 		password1 = data.get('password1')
 		password2 = data.get('password2')
+		player_id = data.get('player_id')
 
 		user = User.query.filter_by(email=email).first()
 		if user:
@@ -56,14 +57,17 @@ def sign_up():
 			flash('Password is too short.', category='error')
 		else:
 			#add user to db
-			user = User(email=email, first_name=first_name, password=generate_password_hash(password1, method='sha256'))
+			user = User(email=email, first_name=first_name, last_name=last_name, password=generate_password_hash(password1, method='sha256'))
+			if player_id != '-1':
+				user.player_id = player_id
 			db.session.add(user)
 			db.session.commit()
 			flash('Account creation successful.', category='success')
 			login_user(user, remember=True)
 			return redirect(url_for('views.home'))
 
-	return render_template("signup.html")
+	players = Player.query.order_by(Player.name.asc()).all()
+	return render_template("signup.html", players=players)
 
 @auth.route('/edit_user', methods=['GET','POST'])
 @login_required
