@@ -11,7 +11,7 @@ def seconds_to_hours_minutes(seconds):
 	HOUR = N // hour
 	MINUT = (N - (HOUR * hour)) // min
 	SECONDS = N - ((HOUR * hour) + (MINUT * min))
-	returnVal = str(HOUR)+":"+str(MINUT)
+	returnVal = str(HOUR)+":"+"{:02d}".format(MINUT)
 	return returnVal
 
 def merge_behavior(behavior, stat):

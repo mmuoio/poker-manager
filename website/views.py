@@ -1642,13 +1642,12 @@ def player_stats():
 			plo = True
 			plo8 = True
 			game_type_filter = ['NLHE', 'PLO', 'PLO8']
-		print(plo)
 		
 		if player:
 			#get behavior stats
 			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
-			bankrolls = Bankroll.query.filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
-			#print(bankrolls)
+			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
+			print(bankrolls)
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
 				'pre_hands_participated' : [0,0,0,0],

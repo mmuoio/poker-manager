@@ -34,7 +34,7 @@
 	</div>
 <h3 style="padding-left: 6px;">Dashboard</h3>
 
-
+{% if bankrolls %}
 <div class="row">
 	<div class="col-xl-12 col-lg-6">
 
@@ -457,6 +457,9 @@
 	</div>
 {% endfor %}
 </div>
+{% else %}
+<br/><div align="center">There is nothing to display.</div>
+{% endif %}
 
 
 <script type="text/javascript">
