@@ -21,6 +21,9 @@
         crossorigin="anonymous"
         ></script>
     <title>{% block title %}Home{% endblock %}</title>
+    {% block extra_header %}
+    
+    {% endblock %}
     </head>
     <body class="body">
         <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #3fa76c;">
@@ -44,6 +47,9 @@
                             <!--<li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-usd" aria-hidden="true"></i><br/>Bankroll</a></li>-->
                             {% endif %}
                         </ul>
+                    </div>
+                    <div class="navbar-nav ml-auto" style="margin-left: auto">
+                       <a href="https://account.venmo.com/u/MattMuoio" target="_blank" class="btn btn-warning"><b>$ Donate</b></a>
                     </div>
                     <div class="navbar-nav ml-auto" style="margin-left: auto">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">

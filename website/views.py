@@ -1647,7 +1647,7 @@ def player_stats():
 			#get behavior stats
 			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
 			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
-			print(bankrolls)
+			
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
 				'pre_hands_participated' : [0,0,0,0],
@@ -1694,15 +1694,25 @@ def player_stats():
 					player_behavior[each_behavior][3] += x+y+z
 
 			#print(player_behavior)
+			bankrollChartX = []
+			bankrollChartY = []
 			winslosses = [0,0]
 			for bankroll in bankrolls:
 				if bankroll.net > 0:
 					winslosses[0] += 1
 				elif bankroll.net < 0:
 					winslosses[1] += 1
+			bankrollNet = 0
+			bankroll_reverse = bankrolls.copy()
+			bankroll_reverse.reverse()
+			for bankroll in bankroll_reverse:
+				bankrollNet += bankroll.net
+				bankrollChartY.append(bankrollNet)
+				bankrollChartX.append(bankroll.date.strftime('%b %d, %y'))
+				print(bankrollNet)
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
-	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8)
+	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8, bankrollChartX=bankrollChartX, bankrollChartY=bankrollChartY)
 
 @views.route('/delete_log', methods=['GET'])
 def delete_log():
