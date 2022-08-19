@@ -128,8 +128,9 @@ def manage_users():
 	user=current_user
 	users = User.query.order_by(User.first_name.asc()).all()
 	
-	import datetime
-	today = datetime.datetime.now()
+	import datetime, pytz
+	utc=pytz.UTC
+	today = utc.localize(datetime.datetime.now())
 	
 	return render_template("manage_users.html", user=current_user, users=users, today=today)
 
