@@ -1,14 +1,39 @@
 #from asyncio.windows_events import NULL
 from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for, make_response, Response
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, AnonymousUserMixin
 from sqlalchemy import null, func, asc, desc
 from .models import Bankroll, Player, Alias, Game, Payment, Url, Earning, PokernowId, Behavior
 from . import db
 import json, requests, csv
 from io import StringIO
-from flask_permissions.decorators import user_is, user_has
+from functools import wraps
+
 
 views = Blueprint('views', __name__)
+
+def admin_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		#print(current_user.admin)
+		if current_user.is_anonymous:
+			return redirect(url_for('auth.login'))
+		if current_user and current_user.admin:
+			return f(*args, **kwargs)
+		else:
+			return redirect(url_for('auth.login'))
+	return decorated_function
+
+def sub_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		#print(current_user.admin)
+		if current_user.is_anonymous:
+			return redirect(url_for('auth.login'))
+		if current_user and current_user.subscribed:
+			return f(*args, **kwargs)
+		else:
+			return redirect(url_for('auth.login'))
+	return decorated_function
 
 @views.route('/home', methods=['GET', 'POST'])
 #@login_required
@@ -84,6 +109,7 @@ def players():
 
 
 @views.route('/edit_player', methods=['GET','POST'])
+@admin_required
 def edit_player():
 	player_id = request.args.get('player_id')
 	if not player_id:
@@ -134,6 +160,7 @@ def edit_player():
 	
 
 @views.route('/delete-alias', methods=['POST'])
+@admin_required
 def delete_alias():
 	data = json.loads(request.data)
 	aliasId = data['aliasId']
@@ -145,6 +172,7 @@ def delete_alias():
 
 
 @views.route('/import_game', methods=['GET','POST'])
+@admin_required
 def import_game():
 	if request.method == 'POST':
 		data = request.form
@@ -180,6 +208,7 @@ def import_game():
 	return render_template("import_game.html", user=current_user)
 
 @views.route('/link_players', methods=['GET','POST'])
+@admin_required
 def link_players():	
 	processLedger = 0
 	if request.method=='POST' and request.form.get('whichForm') == 'addPlayer':
@@ -534,6 +563,7 @@ def export_settlement():
 
 
 @views.route('/delete_game', methods=['GET'])
+@admin_required
 def delete_game():
 	gameID = request.args.get('game_id')
 	game = Game.query.filter_by(id=gameID).first()
@@ -586,6 +616,7 @@ def profile():
 
 @views.route('/import_log', methods=['GET','POST'])
 @login_required
+@admin_required
 def import_log():
 	game_id = request.args.get('game_id')
 	game = Game.query.filter_by(id=game_id).first()
@@ -640,7 +671,7 @@ def import_log():
 
 
 
-
+@admin_required
 def parse_log(csv_file):
 	import re
 
@@ -978,6 +1009,7 @@ def parse_log(csv_file):
 		'smallBlind' : smallBlind
 	}
 
+@admin_required
 def parseBehavior(pokerGame, game_id, stripped_filename):
 	colorsDark = ['rgba(0,129,0,1)','rgba(0,0,255,1)','rgba(255,0,0,1)','rgba(255,165,0,1)','rgba(128,0,128,1)','rgba(139,69,19,1)','rgba(0,0,0,1)', 'rgb(255,20,147,1)', 'rgba(47,79,79,1)']
 	colorsLight = ['rgba(0,129,0,0.5)','rgba(0,0,255,0.5)','rgba(255,0,0,0.5)','rgba(255,165,0,0.5)','rgba(128,0,128,0.5)','rgba(139,69,19,0.5)','rgba(0,0,0,0.5)', 'rgb(255,20,147,0.5)', 'rgba(47,79,79,0.5)']
@@ -1618,16 +1650,17 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 
 @views.route('/player_stats', methods=['GET','POST'])
 @login_required
+@sub_required
 def player_stats():
 	user=current_user
 	player=null
 	if user.player_id:
 		player = Player.query.filter_by(id=user.player_id).first()
-		player = Player.query.filter_by(id=28).first()	#MG
+		#player = Player.query.filter_by(id=28).first()	#MG
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
 		#player = Player.query.filter_by(id=20).first()	#Josh
-		player = Player.query.filter_by(id=38).first()	#Sean
+		#player = Player.query.filter_by(id=38).first()	#Sean
 
 
 		if request.method == 'POST':
@@ -1715,6 +1748,7 @@ def player_stats():
 	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8, bankrollChartX=bankrollChartX, bankrollChartY=bankrollChartY)
 
 @views.route('/delete_log', methods=['GET'])
+@admin_required
 def delete_log():
 	urlID = request.args.get('url_id')
 	

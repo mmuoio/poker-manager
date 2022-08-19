@@ -4,8 +4,21 @@ from .models import User, Player
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
+from functools import wraps
 
 auth = Blueprint('auth', __name__)
+
+def admin_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		#print(current_user.admin)
+		if current_user.is_anonymous:
+			return redirect(url_for('auth.login'))
+		if current_user and current_user.admin:
+			return f(*args, **kwargs)
+		else:
+			return redirect(url_for('auth.login'))
+	return decorated_function
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -110,6 +123,7 @@ def edit_user():
 
 @auth.route('/manage_users', methods=['GET','POST'])
 @login_required
+@admin_required
 def manage_users():
 	user=current_user
 	users = User.query.order_by(User.first_name.asc()).all()
@@ -122,7 +136,8 @@ def manage_users():
 
 @auth.route('/expire_sub', methods=['POST'])
 @login_required
-def delete_alias():
+@admin_required
+def expire_sub():
 	import json
 	from flask import jsonify
 	data = json.loads(request.data)
@@ -135,6 +150,7 @@ def delete_alias():
 
 @auth.route('/add_30_days', methods=['POST'])
 @login_required
+@admin_required
 def add_30_days():
 	import json, datetime
 	from flask import jsonify
