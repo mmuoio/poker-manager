@@ -50,3 +50,8 @@
 .nav-link{
 	color: #fff;
 }
+
+.card-body h3{
+	margin-top:5px !important;
+	margin-bottom: 5px !important;
+}

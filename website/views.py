@@ -6,6 +6,7 @@ from .models import Bankroll, Player, Alias, Game, Payment, Url, Earning, Pokern
 from . import db
 import json, requests, csv
 from io import StringIO
+from flask_permissions.decorators import user_is, user_has
 
 views = Blueprint('views', __name__)
 
@@ -440,7 +441,7 @@ def link_players():
 		#####################################
 		#ADD POKER NOW IDS TO DB
 		#####################################
-		print(debt)
+		#print(debt)
 		for pn_id in debt['pn_player_id']:
 			pnid_lookup = PokernowId.query.filter_by(pn_id=pn_id).first()
 			if pnid_lookup:
@@ -1125,7 +1126,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 
 	#print(allPlayerActions)
 	allBehavior = []
-	import json
 	for hand in allPreflopAction:
 
 		#print(json.dumps(hand, indent=4))
@@ -1627,6 +1627,7 @@ def player_stats():
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
 		#player = Player.query.filter_by(id=20).first()	#Josh
+		player = Player.query.filter_by(id=38).first()	#Sean
 
 
 		if request.method == 'POST':
@@ -1709,7 +1710,6 @@ def player_stats():
 				bankrollNet += bankroll.net
 				bankrollChartY.append(bankrollNet)
 				bankrollChartX.append(bankroll.date.strftime('%b %d, %y'))
-				print(bankrollNet)
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
 			#if handsPlayed == 0 else round((handsParticipated / handsPlayed * 100),2),
 	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8, bankrollChartX=bankrollChartX, bankrollChartY=bankrollChartY)

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from .models import User, Player
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -104,3 +105,45 @@ def edit_user():
 			return redirect(url_for('views.profile'))
 		
 	return render_template("edit_user.html", user=current_user)
+
+
+
+@auth.route('/manage_users', methods=['GET','POST'])
+@login_required
+def manage_users():
+	user=current_user
+	users = User.query.order_by(User.first_name.asc()).all()
+	
+	import datetime
+	today = datetime.datetime.now()
+	
+	return render_template("manage_users.html", user=current_user, users=users, today=today)
+
+
+@auth.route('/expire_sub', methods=['POST'])
+@login_required
+def delete_alias():
+	import json
+	from flask import jsonify
+	data = json.loads(request.data)
+	userID = data['userID']
+	user = User.query.get(userID)
+	if user:
+		user.subscribed = False
+		db.session.commit()
+	return jsonify({})
+
+@auth.route('/add_30_days', methods=['POST'])
+@login_required
+def add_30_days():
+	import json, datetime
+	from flask import jsonify
+	data = json.loads(request.data)
+	userID = data['userID']
+	user = User.query.get(userID)
+	if user:
+		new_date = user.expires_on + timedelta(days=30)
+		#print(new_date)
+		user.expires_on = new_date
+		db.session.commit()
+	return jsonify({})

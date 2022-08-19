@@ -2,12 +2,10 @@ Paginate games
 Set up dev/prod variable
 Add a check that amount paid out matches how much they put in
 Make it so you can't resettle a game
-make game row clickable instead of date
 Make dates UTC and localize by user
 
 Feature requests:
 Venmo payment/request integration
-create profiles that can be linked to players
 Stats by game type
 Reset game
 
@@ -36,3 +34,5 @@ Login page simplification
 Add log import button to settlement page
 Log import button disabled after importing
 Batch reload logs
+Mobile optimization
+Table toggle for player stats

@@ -12,6 +12,9 @@ class User(db.Model, UserMixin):
 	last_name = db.Column(db.String(150))
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 	admin = db.Column(db.Boolean, default=False)
+	subscribed = db.Column(db.Boolean, default=False)
+	expires_on = db.Column(db.DateTime(timezone=True), default=func.now())
+	
 
 class Player(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

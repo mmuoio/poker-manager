@@ -23,3 +23,20 @@ function deleteAlias(aliasId, player_id){
 	
 }
 
+function expireSub(userID){
+	fetch('/expire_sub', {
+		method: 'POST',
+		body: JSON.stringify({userID: userID}),
+	}).then((_res) => {
+		window.location.href = '/manage_users';
+	});
+}
+
+function add30Days(userID){
+	fetch('/add_30_days', {
+		method: 'POST',
+		body: JSON.stringify({userID: userID}),
+	}).then((_res) => {
+		window.location.href = '/manage_users';
+	});
+}

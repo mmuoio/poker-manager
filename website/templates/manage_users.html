@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h1 align="center">Manage Users</h1>
+
+<table class="table">
+	<thead>
+	  <tr>
+		<th scope="col">NAME</th>
+		<th scope="col">VENMO</th>
+		<th scope="col">ALIAS</th>
+		<th scope="col">SUBSCRIBED</th>
+		<th scope="col">EXPIRATION</th>
+		<th scope="col">CANCEL SUB</th>
+		<th scope="col">ADD 30 DAYS</th>
+	  </tr>
+	</thead>
+	<tbody>
+	{% if users %}
+	{% for user in users %}
+		<tr style="vertical-align: middle">
+			<td><strong>{{ user.first_name }} {{ user.last_name }}</strong></td>
+			<td>{{ user.player.venmo }}</td>
+			<td>
+				{% for alias in user.player.aliases %}
+				<span class="badge rounded-pill bg-secondary">{{ alias.alias }}</span>
+				{% endfor %}
+			</td>
+			<td>{{user.subscribed}}</td>
+			<td {% if user.expires_on <= today %}class="text-danger"{% endif %}>{{user.expires_on.strftime('%a, %b %d, %Y')}}</td>
+			<td align="center">
+				<button type="button" class="btn btn-danger" onClick="expireSub({{user.id}})">X</button>
+			</td>
+			<td align="center">
+				<button type="button" class="btn btn-primary" onClick="add30Days({{user.id}})">+30</button>
+			</td>
+		</tr>
+	{% endfor %}
+	{% endif %}
+</tbody>
+</table>
+	
+
+
+
+
+{% endblock %}
