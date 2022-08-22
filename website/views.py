@@ -1668,7 +1668,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#for eachAction in pokerGame['adminActions']:
 	#	print(eachAction)
 	#print(pokerGame['adminActions'])
-	#db.session.commit()
+	db.session.commit()
 
 	return allPlayerActions
 
