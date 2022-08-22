@@ -1811,7 +1811,7 @@ def batch_import_logs():
 		#db.session.flush()
 
 		stripped_filename = url.url.replace('https://www.pokernow.club/games/','')
-		file_name = "website\\static\\uploads\logs\\poker_now_log_" + stripped_filename + '.csv'
+		file_name = "website\\static\\uploads\\logs\\poker_now_log_" + stripped_filename + '.csv'
 		file_exists = exists(file_name)
 		print(file_name, file_exists)
 		#if file_exists:
