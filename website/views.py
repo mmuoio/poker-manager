@@ -645,7 +645,7 @@ def import_log():
 		#return True
 		for f in files:
 
-			file_name = "website\\static\\uploads\logs\\" + secure_filename(f.filename)
+			file_name = "website/static/uploads/logs/" + secure_filename(f.filename)
 			
 			urls = []
 			for url in game.urls:
