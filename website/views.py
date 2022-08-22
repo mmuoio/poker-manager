@@ -1800,7 +1800,7 @@ def batch_import_logs():
 	import os
 	from os.path import exists
 	urls = Url.query.all()
-	os.makedirs('/website/static/uploads/logs/')
+	os.makedirs('website/static/uploads/logs/')
 	for url in urls:
 		#behaviors = Behavior.query.filter_by(url_id=url.id).all()
 		#bankrolls = Bankroll.query.filter_by(url_id=url.id).all()
