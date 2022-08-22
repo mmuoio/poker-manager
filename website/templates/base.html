@@ -38,11 +38,11 @@
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-players" href="/players"><i class="fa fa-user" aria-hidden="true"></i><br/>Players</a></li>
-                            {% if user and  user.is_authenticated and user.admin %}
+                            {% if user and  user.is_authenticated and user.can_upload %}
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/import_game"><i class="fa fa-upload" aria-hidden="true"></i><br/>Import Game</a></li>
                             {% endif %}
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/games"><i class="fa fa-database" aria-hidden="true"></i><Br/>Games</a></li>
-                            {% if user and  user.is_authenticated and user.player_id %}
+                            {% if user and  user.is_authenticated and user.player_id and user.subscribed %}
                             <li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-pie-chart" aria-hidden="true"></i><br/>Stats</a></li>
                             <!--<li class="nav-item" align="center"><a class="nav-link" id="nav-import-game" href="/player_stats"><i class="fa fa-usd" aria-hidden="true"></i><br/>Bankroll</a></li>-->
                             {% endif %}

@@ -35,6 +35,18 @@ def sub_required(f):
 			return redirect(url_for('auth.login'))
 	return decorated_function
 
+def can_upload(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		#print(current_user.admin)
+		if current_user.is_anonymous:
+			return redirect(url_for('auth.login'))
+		if current_user and current_user.can_upload:
+			return f(*args, **kwargs)
+		else:
+			return redirect(url_for('auth.login'))
+	return decorated_function
+
 @views.route('/home', methods=['GET', 'POST'])
 #@login_required
 def home():
@@ -172,7 +184,7 @@ def delete_alias():
 
 
 @views.route('/import_game', methods=['GET','POST'])
-@admin_required
+@can_upload
 def import_game():
 	if request.method == 'POST':
 		data = request.form
@@ -208,7 +220,7 @@ def import_game():
 	return render_template("import_game.html", user=current_user)
 
 @views.route('/link_players', methods=['GET','POST'])
-@admin_required
+@can_upload
 def link_players():	
 	processLedger = 0
 	if request.method=='POST' and request.form.get('whichForm') == 'addPlayer':
@@ -616,7 +628,7 @@ def profile():
 
 @views.route('/import_log', methods=['GET','POST'])
 @login_required
-@admin_required
+@can_upload
 def import_log():
 	game_id = request.args.get('game_id')
 	game = Game.query.filter_by(id=game_id).first()
@@ -671,7 +683,7 @@ def import_log():
 
 
 
-@admin_required
+@can_upload
 def parse_log(csv_file):
 	import re
 
@@ -1009,7 +1021,7 @@ def parse_log(csv_file):
 		'smallBlind' : smallBlind
 	}
 
-@admin_required
+@can_upload
 def parseBehavior(pokerGame, game_id, stripped_filename):
 	colorsDark = ['rgba(0,129,0,1)','rgba(0,0,255,1)','rgba(255,0,0,1)','rgba(255,165,0,1)','rgba(128,0,128,1)','rgba(139,69,19,1)','rgba(0,0,0,1)', 'rgb(255,20,147,1)', 'rgba(47,79,79,1)']
 	colorsLight = ['rgba(0,129,0,0.5)','rgba(0,0,255,0.5)','rgba(255,0,0,0.5)','rgba(255,165,0,0.5)','rgba(128,0,128,0.5)','rgba(139,69,19,0.5)','rgba(0,0,0,0.5)', 'rgb(255,20,147,0.5)', 'rgba(47,79,79,0.5)']
@@ -1656,7 +1668,7 @@ def player_stats():
 	player=null
 	if user.player_id:
 		player = Player.query.filter_by(id=user.player_id).first()
-		#player = Player.query.filter_by(id=28).first()	#MG
+		player = Player.query.filter_by(id=28).first()	#MG
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
 		#player = Player.query.filter_by(id=20).first()	#Josh
@@ -1748,7 +1760,7 @@ def player_stats():
 	return render_template("player_stats.html", user=current_user, player=player, pb=player_behavior, bankrolls=bankrolls, wl=winslosses, nlhe=nlhe, plo=plo, plo8=plo8, bankrollChartX=bankrollChartX, bankrollChartY=bankrollChartY)
 
 @views.route('/delete_log', methods=['GET'])
-@admin_required
+@can_upload
 def delete_log():
 	urlID = request.args.get('url_id')
 	

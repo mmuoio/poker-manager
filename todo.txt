@@ -6,7 +6,6 @@ Make dates UTC and localize by user
 
 Feature requests:
 Venmo payment/request integration
-Stats by game type
 Reset game
 
 Profile
@@ -24,7 +23,6 @@ Log importing
 
 
 BB Jackpot
-Convert to other poker formats
 
 
 Tab out stats/bankroll

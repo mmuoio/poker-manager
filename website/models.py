@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 	admin = db.Column(db.Boolean, default=False)
 	subscribed = db.Column(db.Boolean, default=False)
+	can_upload = db.Column(db.Boolean, default=False)
 	expires_on = db.Column(db.DateTime(timezone=True), default=func.now())
 	
 

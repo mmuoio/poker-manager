@@ -162,5 +162,6 @@ def add_30_days():
 		new_date = user.expires_on + timedelta(days=30)
 		#print(new_date)
 		user.expires_on = new_date
+		user.subscribed = True
 		db.session.commit()
 	return jsonify({})
