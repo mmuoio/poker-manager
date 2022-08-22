@@ -1817,6 +1817,6 @@ def batch_import_logs():
 		#if file_exists:
 		#	parsedLog = parse_log(file_name)
 		#	behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
-	logs = os.listdir('website\\static\\uploads\logs\\')
-	ledgers = os.listdir('website\\static\\uploads\ledgers\\')
+	logs = os.listdir('website/static/uploads/logs/')
+	ledgers = os.listdir('website/static/uploads/ledgers/')
 	return render_template("batch_import_logs.html", user=current_user, logs=logs, ledgers=ledgers)
