@@ -1668,7 +1668,7 @@ def player_stats():
 	player=null
 	if user.player_id:
 		player = Player.query.filter_by(id=user.player_id).first()
-		player = Player.query.filter_by(id=28).first()	#MG
+		#player = Player.query.filter_by(id=28).first()	#MG
 		#player = Player.query.filter_by(id=13).first()	#Fluffy
 		#player = Player.query.filter_by(id=14).first()	#Gocha
 		#player = Player.query.filter_by(id=20).first()	#Josh
