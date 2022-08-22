@@ -287,6 +287,8 @@ def link_players():
 		try:
 			sleep(3)
 			r = requests.get(ledger_url, verify=False, timeout=10)
+			import urllib.request
+			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
 			r.raise_for_status()
 		except: #(RuntimeError, TypeError, NameError):
 			#print(RuntimeError,TypeError,NameError)
@@ -661,9 +663,9 @@ def import_log():
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
 				#for each in behavior:
 				#	print(each)
-				if len(behavior) > 0:
-					import os
-					os.remove(file_name)
+				#if len(behavior) > 0:
+				#	import os
+				#	os.remove(file_name)
 			else:
 				flash("That file does not belong to this game or has already been uploaded.", category="error")
 
@@ -1419,21 +1421,32 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#####################################
 	#LOAD THE GAME, ERROR IF FAILED
 	#####################################
+	from time import sleep
+	from os.path import exists
 	try:
-		r = requests.get(ledger_url, verify=False, timeout=10)
-		r.raise_for_status()
+		sleep(5)
+		#r = requests.get(ledger_url, verify=False, timeout=10)
+		if not exists('website/static/uploads/ledgers/ledger_'+game_code+'.csv'):
+			import urllib.request
+			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_code+'.csv')
+		#print('success')
+		#r.raise_for_status()
 	except: #(RuntimeError, TypeError, NameError):
+		#print('error')
 		flash("There was an error loading loading the ledger.", category="error")
 		return render_template("import_log.html", user=current_user)
-	if r.status_code != 200:
-		flash("There was an error loading importing the game2.", category="error")
-		return render_template("import_log.html", user=current_user)
+	#if r.status_code != 200:
+	#	flash("There was an error loading importing the game2.", category="error")
+	#	return render_template("import_log.html", user=current_user)
+	
+	csv_file = open('website/static/uploads/ledgers/ledger_'+game_code+'.csv', 'r')
 
 	#####################################
 	#GAME LOADED
 	#####################################
 
-	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(csv_file, skipinitialspace=True)])
 		
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
@@ -1655,7 +1668,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#for eachAction in pokerGame['adminActions']:
 	#	print(eachAction)
 	#print(pokerGame['adminActions'])
-	db.session.commit()
+	#db.session.commit()
 
 	return allPlayerActions
 
@@ -1776,3 +1789,31 @@ def delete_log():
 	#games = Game.query.all()
 	#return render_template("games.html", user=current_user, games=games)
 	return redirect(url_for('views.import_log', game_id=url.game_id))
+
+@views.route('/batch_import_logs', methods=['GET','POST'])
+@login_required
+@can_upload
+def batch_import_logs():
+	import os
+	from os.path import exists
+	urls = Url.query.all()
+	for url in urls:
+		#behaviors = Behavior.query.filter_by(url_id=url.id).all()
+		#bankrolls = Bankroll.query.filter_by(url_id=url.id).all()
+		#url.imported = False
+		#for behavior in behaviors:
+		#	db.session.delete(behavior)
+		#for bankroll in bankrolls:
+		#	db.session.delete(bankroll)
+		#db.session.flush()
+
+		stripped_filename = url.url.replace('https://www.pokernow.club/games/','')
+		file_name = "website\\static\\uploads\logs\\poker_now_log_" + stripped_filename + '.csv'
+		file_exists = exists(file_name)
+		print(file_name, file_exists)
+		#if file_exists:
+		#	parsedLog = parse_log(file_name)
+		#	behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
+	logs = os.listdir('website\\static\\uploads\logs\\')
+	ledgers = os.listdir('website\\static\\uploads\ledgers\\')
+	return render_template("batch_import_logs.html", user=current_user, logs=logs, ledgers=ledgers)

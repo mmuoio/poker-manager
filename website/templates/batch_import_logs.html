@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Games{% endblock %}
+
+{% block content %}
+
+	{% for log in logs %}
+	{{log}}<br/>
+	{% endfor %}
+
+	<br/><br/>
+
+
+	{% for ledger in ledgers %}
+	{{ledger}}<br/>
+	{% endfor %}
+
+{% endblock %}
+
