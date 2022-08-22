@@ -1423,9 +1423,12 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#####################################
 	from time import sleep
 	from os.path import exists
+	from os import makedirs
 	try:
 		sleep(5)
 		#r = requests.get(ledger_url, verify=False, timeout=10)
+		if not exists('website/static/uploads/ledgers/'):
+			makedirs('website/static/uploads/ledgers/')
 		if not exists('website/static/uploads/ledgers/ledger_'+game_code+'.csv'):
 			import urllib.request
 			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_code+'.csv')
