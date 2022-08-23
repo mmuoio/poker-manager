@@ -310,7 +310,7 @@ def link_players():
 		#LOAD THE GAME, ERROR IF FAILED
 		#####################################
 		try:
-			sleep(3)
+			sleep(5)
 			r = requests.get(ledger_url, verify=False, timeout=10)
 			import urllib.request
 			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
