@@ -321,7 +321,7 @@ def link_players():
                 )
 			r.raise_for_status()
 		except: #(RuntimeError, TypeError, NameError):
-			#print(RuntimeError,TypeError,NameError)
+			print(RuntimeError,TypeError,NameError)
 			flash("There was an error loading importing the game1.", category="error")
 			return render_template("import_game.html", user=current_user)
 		if r.status_code != 200:
