@@ -61,6 +61,9 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-lg-end">
                                     <li><a class="dropdown-item" href="/edit_user">Edit Profile</a></li>
+                                    {% if user and  user.is_authenticated and user.admin %}
+                                    <li><a class="dropdown-item" href="/manage_users">Manage Subs</a></li>
+                                    {% endif %}
                                     <li><a class="dropdown-item" id="nav-logout" href="/logout">Logout</a></li>
                                 </ul>
                             </div>

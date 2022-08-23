@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}S3 Object List{% endblock %}
+
+{% block content %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-12-xs">
+				{% for f in files %}
+				{{f.key}}<br/>
+				{{f.last_modified}}<br/><br/>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
+

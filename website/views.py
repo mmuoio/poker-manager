@@ -8,8 +8,33 @@ import json, requests, csv
 from io import StringIO
 from functools import wraps
 
+import boto3
+
+
+s3 = boto3.client('s3',
+                    aws_access_key_id='AKIAYX7T7SKTAWVRLH56',
+                    aws_secret_access_key= '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',
+                    #aws_session_token='secret token here'
+                     )
+BUCKET_NAME='pokermanager'
+
+
+def isfile_s3(key: str) -> bool:
+	s3_resource = boto3.resource('s3')
+	bucket = s3_resource.Bucket(BUCKET_NAME)
+	"""Returns T/F whether the file exists."""
+	objs = list(bucket.objects.filter(Prefix=key))
+	return len(objs) == 1 and objs[0].key == key
 
 views = Blueprint('views', __name__)
+
+@views.route('/files', methods=['GET', 'POST'])
+def files():
+	s3_resource = boto3.resource('s3')
+	my_bucket = s3_resource.Bucket(BUCKET_NAME)
+	summaries = my_bucket.objects.all()
+	return render_template('files.html', my_bucket=my_bucket, files=summaries)
+
 
 def admin_required(f):
 	@wraps(f)
@@ -289,6 +314,11 @@ def link_players():
 			r = requests.get(ledger_url, verify=False, timeout=10)
 			import urllib.request
 			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
+			s3.upload_file(
+                    Bucket = BUCKET_NAME,
+                    Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
+                    Key = 'ledgers/ledger_'+game_id+'.csv'
+                )
 			r.raise_for_status()
 		except: #(RuntimeError, TypeError, NameError):
 			#print(RuntimeError,TypeError,NameError)
@@ -655,9 +685,15 @@ def import_log():
 			stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
 			if stripped_filename in urls:
 				f.save(file_name)
+				s3.upload_file(
+                    Bucket = BUCKET_NAME,
+                    Filename=file_name,
+                    Key = 'logs/'+secure_filename(f.filename)
+                )
 				#print('file uploaded successfully')
 
-				parsedLog = parse_log(file_name)
+				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
+				parsedLog = parse_log(ledger_url_s3)
 				
 				
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
@@ -688,9 +724,14 @@ def import_log():
 @can_upload
 def parse_log(csv_file):
 	import re
-
+	import urllib
+	response = urllib.request.urlopen(csv_file)
+	data = response.read().decode('utf-8')
 	csv_dicts = []
-	csv_file = csv.DictReader(open(csv_file))
+	#csv_file = csv.DictReader(open(csv_file))
+	csv_file = csv.DictReader(data.splitlines())
+	#print(csv_file)
+	#return 0
 
 	# Admin action regexes
 	createGameRegex = '^The player "(.*) @ (.*)" created the game with a stack of (\d*(?:\.\d\d)?)'
@@ -1417,6 +1458,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	game_url_split = game_url.split('/')
 	game_code = game_url_split[-1]
 	ledger_url = game_url + '/ledger_' + game_code + '.csv'
+	ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
 
 	#####################################
 	#LOAD THE GAME, ERROR IF FAILED
@@ -1426,30 +1468,34 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	from os import makedirs
 	try:
 		sleep(5)
-		#r = requests.get(ledger_url, verify=False, timeout=10)
-		if not exists('website/static/uploads/ledgers/'):
-			makedirs('website/static/uploads/ledgers/')
-		if not exists('website/static/uploads/ledgers/ledger_'+game_code+'.csv'):
+		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
+		#if not exists('website/static/uploads/ledgers/ledger_'+game_code+'.csv'):
 			import urllib.request
 			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_code+'.csv')
+			s3.upload_file(
+                    Bucket = BUCKET_NAME,
+                    Filename='website/static/uploads/ledgers/ledger_'+game_code+'.csv',
+                    Key = 'ledgers/ledger_'+game_code+'.csv'
+                )
 		#print('success')
-		#r.raise_for_status()
+		r = requests.get(ledger_url, verify=False, timeout=10)
+		r.raise_for_status()
 	except: #(RuntimeError, TypeError, NameError):
 		#print('error')
 		flash("There was an error loading loading the ledger.", category="error")
 		return render_template("import_log.html", user=current_user)
-	#if r.status_code != 200:
-	#	flash("There was an error loading importing the game2.", category="error")
-	#	return render_template("import_log.html", user=current_user)
+	if r.status_code != 200:
+		flash("There was an error loading importing the game2.", category="error")
+		return render_template("import_log.html", user=current_user)
 	
-	csv_file = open('website/static/uploads/ledgers/ledger_'+game_code+'.csv', 'r')
-
+	#csv_file = open('website/static/uploads/ledgers/ledger_'+game_code+'.csv', 'r')
+	
 	#####################################
 	#GAME LOADED
 	#####################################
 
-	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
-	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(csv_file, skipinitialspace=True)])
+	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(csv_file, skipinitialspace=True)])
 		
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
@@ -1797,6 +1843,9 @@ def delete_log():
 @login_required
 @can_upload
 def batch_import_logs():
+	#loop over the urls
+	#if url log exists, run behavior
+	#if ledger is missing, try to grab it and store to s3
 	import os
 	from os.path import exists
 	urls = Url.query.all()
@@ -1815,12 +1864,35 @@ def batch_import_logs():
 		#db.session.flush()
 
 		stripped_filename = url.url.replace('https://www.pokernow.club/games/','')
-		file_name = "website\\static\\uploads\\logs\\poker_now_log_" + stripped_filename + '.csv'
-		file_exists = exists(file_name)
-		print(file_name, file_exists)
-		#if file_exists:
-		#	parsedLog = parse_log(file_name)
-		#	behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
-	logs = os.listdir('website/static/uploads/logs/')
-	ledgers = os.listdir('website/static/uploads/ledgers/')
-	return render_template("batch_import_logs.html", user=current_user, logs=logs, ledgers=ledgers)
+		
+
+	#ledger_url = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
+		log_file_name = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_" + stripped_filename + '.csv'
+		log_file_exists = isfile_s3('logs/poker_now_log_' + stripped_filename + '.csv')
+		#if log_file_exists:
+		#	s3.upload_file(
+		#		Bucket = BUCKET_NAME,
+		#		Filename=log_file_name,
+		#		Key = 'logs/poker_now_log_' + stripped_filename + '.csv'
+		#	)
+			
+		ledger_file_name = "https://pokermanager.s3.amazonaws.com/ledger_" + stripped_filename + '.csv'
+		ledger_file_exists = isfile_s3('ledgers/ledger_' + stripped_filename + '.csv')
+		#if ledger_file_exists:
+		#	s3.upload_file(
+		#		Bucket = BUCKET_NAME,
+		#		Filename=ledger_file_name,
+		#		Key = 'ledgers/ledger_' + stripped_filename + '.csv'
+		#	)
+
+		print(log_file_name, log_file_exists, ledger_file_exists)
+
+		if log_file_exists:
+			parsedLog = parse_log(log_file_name)
+			behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
+	#logs = os.listdir('website/static/uploads/logs/')
+	#ledgers = os.listdir('website/static/uploads/ledgers/')
+	s3_resource = boto3.resource('s3')
+	my_bucket = s3_resource.Bucket(BUCKET_NAME)
+	summaries = my_bucket.objects.all()
+	return render_template('files.html', my_bucket=my_bucket, files=summaries)
