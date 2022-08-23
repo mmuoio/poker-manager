@@ -15,6 +15,7 @@ s3 = boto3.client('s3',
                     aws_access_key_id='AKIAYX7T7SKTAWVRLH56',
                     aws_secret_access_key= '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',
                     #aws_session_token='secret token here'
+					region_name='us-east-1'
                      )
 BUCKET_NAME='pokermanager'
 
@@ -314,7 +315,7 @@ def link_players():
 			r = requests.get(ledger_url, verify=False, timeout=10)
 			import urllib.request
 			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
-			s3.upload_file(
+			upload = s3.upload_file(
                     Bucket = BUCKET_NAME,
                     Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
                     Key = 'ledgers/ledger_'+game_id+'.csv'
