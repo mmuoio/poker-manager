@@ -31,6 +31,23 @@ Paginate games/bankroll
 Login page simplification
 Add log import button to settlement page
 Log import button disabled after importing
-Batch reload logs
 Mobile optimization
 Table toggle for player stats
+
+remove finger cursor from non-imported bankrolls
+change color slightly
+
+
+Blank logs:
+https://www.pokernow.club/games/pgl2jryzY2m8OHn2NRX8nEfjZ 1/2 NHE
+https://www.pokernow.club/games/pgl1EJ8ADnZxBDe0FxSJvV-Es 1/1 PLO
+https://www.pokernow.club/games/pglY2iTAvZpCo8WVNQrC41ENW 1/1 PLO
+https://www.pokernow.club/games/pglKDSifePW03Z5yOf7lA282t 1/1 PLO
+https://www.pokernow.club/games/pglQUZEB-51jqlmjfSAvN5Bhb 1/2 NLHE
+https://www.pokernow.club/games/pglO3jayBvyg_1X11BAKwNo0S 1/2 NLHE
+https://www.pokernow.club/games/pglTed_aDsbQ9vE-esyGJDKiT 1/2 NLHE
+https://www.pokernow.club/games/pglW3bKp2Z7GbTl84m_G4nS8h 1/2 NLHE
+https://www.pokernow.club/games/pgl5AtNn_Qq7Erhc-lds1eRau 1/2 NLHE
+https://www.pokernow.club/games/pgl8f0PW80WF6ndCrL4lpdtwv 1/2 NLHE
+https://www.pokernow.club/games/pglVCapadGGdcqPsubYSe3K_5 1/1 PLO
+

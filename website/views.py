@@ -1768,8 +1768,8 @@ def player_stats():
 		
 		if player:
 			#get behavior stats
-			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
-			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
+			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
+			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
 			
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
