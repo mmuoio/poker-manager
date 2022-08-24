@@ -311,16 +311,24 @@ def link_players():
 		#LOAD THE GAME, ERROR IF FAILED
 		#####################################
 		from botocore.exceptions import ClientError
+		ledger_contents = []
 		try:
-			sleep(5)
-			r = requests.get(ledger_url, verify=False, timeout=10)
-			import urllib.request
-			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
-			upload = s3.upload_file(
-                    Bucket = BUCKET_NAME,
-                    Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
-                    Key = 'ledgers/ledger_'+game_id+'.csv'
-                )
+			sleep(3)
+			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
+			#r = requests.get(ledger_url, verify=False, timeout=10)
+			for line in r.iter_lines():
+				if line:
+					ledger_contents.append(line.decode('UTF-8'))
+			#import urllib.request
+			#urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
+			#upload = s3.upload_file(
+            #        Bucket = BUCKET_NAME,
+            #        Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
+            #        Key = 'ledgers/ledger_'+game_id+'.csv'
+            #    )
+			s3_resource = boto3.Session().resource('s3')
+			bucket = s3_resource.Bucket(BUCKET_NAME)
+			bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
 			r.raise_for_status()
 		except ClientError as e: #(RuntimeError, TypeError, NameError):
 			#print(RuntimeError,TypeError,NameError)
@@ -334,8 +342,11 @@ def link_players():
 		#####################################
 		#GAME LOADED
 		#####################################
-
-		csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+		#print(r.raw.read())
+		#print(ledger_contents)
+		#return 0
+		#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+		csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
 	
 	#####################################
 	#GET PLAYER INDEX BY PROVIDED KEY AND VALUE
