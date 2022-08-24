@@ -310,6 +310,7 @@ def link_players():
 		#####################################
 		#LOAD THE GAME, ERROR IF FAILED
 		#####################################
+		from botocore.exceptions import ClientError
 		try:
 			sleep(5)
 			r = requests.get(ledger_url, verify=False, timeout=10)
@@ -321,9 +322,9 @@ def link_players():
                     Key = 'ledgers/ledger_'+game_id+'.csv'
                 )
 			r.raise_for_status()
-		except: #(RuntimeError, TypeError, NameError):
+		except ClientError as e: #(RuntimeError, TypeError, NameError):
 			#print(RuntimeError,TypeError,NameError)
-			print(r.status_code)
+			print(ClientError)
 			flash("There was an error loading importing the game1.", category="error")
 			return render_template("import_game.html", user=current_user)
 		if r.status_code != 200:
