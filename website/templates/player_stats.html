@@ -523,8 +523,8 @@
 	<div class="row bankRollRow" id="expandRow{{br.id}}">
 		<div class="col-2">{{br.date.strftime('%a, %b %d, %Y')}}</div>
 		<div class="col-2">{{br.url.small_blind}}/{{br.url.big_blind}} {{br.url.game_type}}</div>
-		<div class="col-2">{{seconds_to_hours_minutes(br.duration)}}</div>
-		<div class="col-2">{{ "{:,}".format(br.behavior.hu_pre_hands_played+br.behavior.sr_pre_hands_played+br.behavior.ft_pre_hands_played) }}</div>
+		<div class="col-2">{% if br.behavior %}{{seconds_to_hours_minutes(br.duration)}}{% else %} N/A {% endif %}</div>
+		<div class="col-2">{% if br.behavior %}{{ "{:,}".format(br.behavior.hu_pre_hands_played+br.behavior.sr_pre_hands_played+br.behavior.ft_pre_hands_played) }}{% else %} N/A {% endif %}</div>
 		<!--<td align="center">{{br.location}}</td>-->
 		<div class="col-1">{{format_dollar(br.buyin)}}</div>
 		<div class="col-1">{{format_dollar(br.cashout)}}</div>
@@ -534,6 +534,7 @@
 
 		
 	</div>
+	{% if br.behavior %}
 	<div class="collapse" id="collapse{{br.id}}">
 		<div class="row bankRollExpandedRow">
 			<div class="col-sm-4 col-xl-4 col-lg-4">
@@ -627,6 +628,7 @@
 		</div>
 		
 	</div>
+	{% endif %}
 {% endfor %}
 </div>
 {% else %}
@@ -691,7 +693,7 @@
 								if(y < 0){
 									return '-$' + (y*-1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 								}else{
-									return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+									return '$' + y.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 								}
 							}
 						}

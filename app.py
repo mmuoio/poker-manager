@@ -6,6 +6,8 @@ from functools import wraps
 app = create_app()
 
 def seconds_to_hours_minutes(seconds):
+	if not seconds:
+		return 0
 	N = int(seconds)
 	min = 60
 	hour = 60 * 60

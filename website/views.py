@@ -707,7 +707,7 @@ def import_log():
 				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
 				parsedLog = parse_log(ledger_url_s3)
 				
-				
+				print(parsedLog)
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
 				#for each in behavior:
 				#	print(each)
@@ -1471,13 +1471,11 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	game_code = game_url_split[-1]
 	ledger_url = game_url + '/ledger_' + game_code + '.csv'
 	ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
-
+	
 	#####################################
 	#LOAD THE GAME, ERROR IF FAILED
 	#####################################
 	from time import sleep
-	from os.path import exists
-	from os import makedirs
 	ledger_contents = []
 	try:
 		sleep(5)
@@ -1722,13 +1720,13 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				bankroll.hands_played=sum(eachPlayer['pre_handsPlayed'])
 
 	
+	
 
-
-
+	
 	urls[which_url].imported = True
-	urls[which_url].game_type = pokerGame['gameType']
-	urls[which_url].big_blind = pokerGame['bigBlind']
-	urls[which_url].small_blind = pokerGame['smallBlind']
+	if pokerGame['gameType']: urls[which_url].game_type = pokerGame['gameType']
+	if pokerGame['bigBlind']: urls[which_url].big_blind = pokerGame['bigBlind']
+	if pokerGame['smallBlind']: urls[which_url].small_blind = pokerGame['smallBlind']
 	#for eachAction in pokerGame['adminActions']:
 	#	print(eachAction)
 	#print(pokerGame['adminActions'])
@@ -1770,8 +1768,8 @@ def player_stats():
 		
 		if player:
 			#get behavior stats
-			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
-			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
+			bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
+			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).filter(Bankroll.url.has(Url.game_type.in_(game_type_filter))).all()
 			
 			player_behavior = {
 				'pre_hands_played' : [0,0,0,0],
@@ -1808,15 +1806,16 @@ def player_stats():
 				}
 			
 			for bankroll in bankrolls:
-				for each_behavior in player_behavior.keys():
-					#print(each_behavior)
-					x = eval('bankroll.behavior.hu_'+each_behavior)
-					y = eval('bankroll.behavior.sr_'+each_behavior)
-					z = eval('bankroll.behavior.ft_'+each_behavior)
-					player_behavior[each_behavior][0] += x
-					player_behavior[each_behavior][1] += y
-					player_behavior[each_behavior][2] += z
-					player_behavior[each_behavior][3] += x+y+z
+				if bankroll.behavior:
+					for each_behavior in player_behavior.keys():
+						#print(each_behavior)
+						x = eval('bankroll.behavior.hu_'+each_behavior)
+						y = eval('bankroll.behavior.sr_'+each_behavior)
+						z = eval('bankroll.behavior.ft_'+each_behavior)
+						player_behavior[each_behavior][0] += x
+						player_behavior[each_behavior][1] += y
+						player_behavior[each_behavior][2] += z
+						player_behavior[each_behavior][3] += x+y+z
 
 			#print(player_behavior)
 			bankrollChartX = []
@@ -1902,6 +1901,8 @@ def batch_import_logs():
 		if log_file_exists:
 			parsedLog = parse_log(log_file_name)
 			behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
+		#else:
+			##run the bankroll part of the log parsing
 		fileCheck.append({
 			'url': url.url,
 			'ledger_exists': ledger_file_exists,
