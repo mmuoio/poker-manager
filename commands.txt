@@ -8,3 +8,5 @@ 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
 git push heroku main
 
 heroku pg:info
+
+git config credential.helper store

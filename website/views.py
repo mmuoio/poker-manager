@@ -313,7 +313,7 @@ def link_players():
 		from botocore.exceptions import ClientError
 		ledger_contents = []
 		try:
-			sleep(5)
+			sleep(3)
 			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			#r = requests.get(ledger_url, verify=False, timeout=10)
 			for line in r.iter_lines():
@@ -1480,7 +1480,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	from os import makedirs
 	ledger_contents = []
 	try:
-		sleep(5)
+		sleep(3)
 		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
 			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			for line in r.iter_lines():
@@ -1745,11 +1745,13 @@ def player_stats():
 	player=null
 	if user.player_id:
 		player = Player.query.filter_by(id=user.player_id).first()
-		#player = Player.query.filter_by(id=28).first()	#MG
-		#player = Player.query.filter_by(id=13).first()	#Fluffy
-		#player = Player.query.filter_by(id=14).first()	#Gocha
-		#player = Player.query.filter_by(id=20).first()	#Josh
-		#player = Player.query.filter_by(id=38).first()	#Sean
+		if user.admin:
+			#player = Player.query.filter_by(id=28).first()	#MG
+			#player = Player.query.filter_by(id=13).first()	#Fluffy
+			#player = Player.query.filter_by(id=14).first()	#Gocha
+			#player = Player.query.filter_by(id=20).first()	#Josh
+			#player = Player.query.filter_by(id=38).first()	#Sean
+			print(player)
 
 
 		if request.method == 'POST':
@@ -1861,27 +1863,22 @@ def batch_import_logs():
 	#loop over the urls
 	#if url log exists, run behavior
 	#if ledger is missing, try to grab it and store to s3
-	import os
-	from os.path import exists
 	urls = Url.query.all()
-	#if not exists('website/static/uploads/logs/'):
-	#	os.makedirs('website/static/uploads/logs/')
-	#if not exists('website/static/uploads/ledgers/'):
-	#	os.makedirs('website/static/uploads/ledgers/')
+
+	fileCheck = []
 	for url in urls:
-		#behaviors = Behavior.query.filter_by(url_id=url.id).all()
-		#bankrolls = Bankroll.query.filter_by(url_id=url.id).all()
-		#url.imported = False
-		#for bankroll in bankrolls:
-		#	db.session.delete(bankroll)
-		#for behavior in behaviors:
-		#	db.session.delete(behavior)
-		#db.session.flush()
+		behaviors = Behavior.query.filter_by(url_id=url.id).all()
+		bankrolls = Bankroll.query.filter_by(url_id=url.id).all()
+		url.imported = False
+		for bankroll in bankrolls:
+			db.session.delete(bankroll)
+		for behavior in behaviors:
+			db.session.delete(behavior)
+		db.session.flush()
 
 		stripped_filename = url.url.replace('https://www.pokernow.club/games/','')
 		
 
-		#ledger_url = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
 		log_file_name = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_" + stripped_filename + '.csv'
 		log_file_exists = isfile_s3('logs/poker_now_log_' + stripped_filename + '.csv')
 		#if log_file_exists:
@@ -1900,14 +1897,18 @@ def batch_import_logs():
 		#		Key = 'ledgers/ledger_' + stripped_filename + '.csv'
 		#	)
 
-		print(log_file_name, log_file_exists, ledger_file_exists)
+		#print(log_file_name, log_file_exists, ledger_file_exists)
 
 		if log_file_exists:
 			parsedLog = parse_log(log_file_name)
 			behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
-	#logs = os.listdir('website/static/uploads/logs/')
-	#ledgers = os.listdir('website/static/uploads/ledgers/')
+		fileCheck.append({
+			'url': url.url,
+			'ledger_exists': ledger_file_exists,
+			'log_exists': log_file_exists
+		})
+	db.session.commit()
 	s3_resource = boto3.resource('s3')
 	my_bucket = s3_resource.Bucket(BUCKET_NAME)
 	summaries = my_bucket.objects.all()
-	return render_template('files.html', my_bucket=my_bucket, files=summaries)
+	return render_template('files.html', my_bucket=my_bucket, files=summaries, file_check=fileCheck)
