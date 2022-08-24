@@ -313,7 +313,7 @@ def link_players():
 		from botocore.exceptions import ClientError
 		ledger_contents = []
 		try:
-			sleep(3)
+			sleep(5)
 			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			#r = requests.get(ledger_url, verify=False, timeout=10)
 			for line in r.iter_lines():
@@ -689,7 +689,7 @@ def import_log():
 		#return True
 		for f in files:
 
-			file_name = "website/static/uploads/logs/" + secure_filename(f.filename)
+			#file_name = "website/static/uploads/logs/" + secure_filename(f.filename)
 			
 			urls = []
 			for url in game.urls:
@@ -698,10 +698,8 @@ def import_log():
 					urls.append(split_url[-1])
 			stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
 			if stripped_filename in urls:
-				f.save(file_name)
-				s3.upload_file(
-                    Bucket = BUCKET_NAME,
-                    Filename=file_name,
+				#f.save(file_name)
+				s3.upload_fileobj(f, BUCKET_NAME,
                     Key = 'logs/'+secure_filename(f.filename)
                 )
 				#print('file uploaded successfully')
@@ -1480,19 +1478,22 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	from time import sleep
 	from os.path import exists
 	from os import makedirs
+	ledger_contents = []
 	try:
 		sleep(5)
 		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
-		#if not exists('website/static/uploads/ledgers/ledger_'+game_code+'.csv'):
-			import urllib.request
-			urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_code+'.csv')
-			s3.upload_file(
-                    Bucket = BUCKET_NAME,
-                    Filename='website/static/uploads/ledgers/ledger_'+game_code+'.csv',
-                    Key = 'ledgers/ledger_'+game_code+'.csv'
-                )
-		#print('success')
-		r = requests.get(ledger_url, verify=False, timeout=10)
+			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
+			for line in r.iter_lines():
+				if line:
+					ledger_contents.append(line.decode('UTF-8'))
+			s3_resource = boto3.Session().resource('s3')
+			bucket = s3_resource.Bucket(BUCKET_NAME)
+			bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
+		else:
+			r = requests.get(ledger_url_s3, verify=False, timeout=10, stream=True)
+			for line in r.iter_lines():
+				if line:
+					ledger_contents.append(line.decode('UTF-8'))
 		r.raise_for_status()
 	except: #(RuntimeError, TypeError, NameError):
 		#print('error')
@@ -1508,7 +1509,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#GAME LOADED
 	#####################################
 
-	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
 	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(csv_file, skipinitialspace=True)])
 		
 	#####################################
@@ -1863,24 +1864,24 @@ def batch_import_logs():
 	import os
 	from os.path import exists
 	urls = Url.query.all()
-	if not exists('website/static/uploads/logs/'):
-		os.makedirs('website/static/uploads/logs/')
-	if not exists('website/static/uploads/ledgers/'):
-		os.makedirs('website/static/uploads/ledgers/')
+	#if not exists('website/static/uploads/logs/'):
+	#	os.makedirs('website/static/uploads/logs/')
+	#if not exists('website/static/uploads/ledgers/'):
+	#	os.makedirs('website/static/uploads/ledgers/')
 	for url in urls:
 		#behaviors = Behavior.query.filter_by(url_id=url.id).all()
 		#bankrolls = Bankroll.query.filter_by(url_id=url.id).all()
 		#url.imported = False
-		#for behavior in behaviors:
-		#	db.session.delete(behavior)
 		#for bankroll in bankrolls:
 		#	db.session.delete(bankroll)
+		#for behavior in behaviors:
+		#	db.session.delete(behavior)
 		#db.session.flush()
 
 		stripped_filename = url.url.replace('https://www.pokernow.club/games/','')
 		
 
-	#ledger_url = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
+		#ledger_url = "https://pokermanager.s3.amazonaws.com/ledgers/ledger_"+game_code+".csv"
 		log_file_name = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_" + stripped_filename + '.csv'
 		log_file_exists = isfile_s3('logs/poker_now_log_' + stripped_filename + '.csv')
 		#if log_file_exists:
