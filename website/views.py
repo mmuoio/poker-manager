@@ -625,10 +625,10 @@ def delete_game():
 		db.session.delete(payment)
 	for earning in earnings:
 		db.session.delete(earning)
-	for behavior in behaviors:
-		db.session.delete(behavior)
 	for bankroll in bankrolls:
 		db.session.delete(bankroll)
+	for behavior in behaviors:
+		db.session.delete(behavior)
 	if game:
 		db.session.delete(game)
 	db.session.commit()
