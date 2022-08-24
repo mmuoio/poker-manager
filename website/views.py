@@ -313,7 +313,7 @@ def link_players():
 		from botocore.exceptions import ClientError
 		ledger_contents = []
 		try:
-			sleep(3)
+			sleep(5)
 			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			#r = requests.get(ledger_url, verify=False, timeout=10)
 			for line in r.iter_lines():
@@ -1480,7 +1480,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	from os import makedirs
 	ledger_contents = []
 	try:
-		sleep(3)
+		sleep(5)
 		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
 			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			for line in r.iter_lines():
