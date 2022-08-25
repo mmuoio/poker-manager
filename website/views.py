@@ -18,7 +18,7 @@ s3 = boto3.client('s3',
 					region_name='us-east-1'
                      )
 BUCKET_NAME='pokermanager'
-
+SLEEP_TIME = 3
 
 def isfile_s3(key: str) -> bool:
 	#return True
@@ -320,7 +320,7 @@ def link_players():
 		from botocore.exceptions import ClientError
 		ledger_contents = []
 		try:
-			sleep(5)
+			sleep(SLEEP_TIME)
 			#r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			r = requests.get(ledger_url, verify=False, timeout=10)
 			
@@ -1495,7 +1495,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	from time import sleep
 	ledger_contents = []
 	try:
-		sleep(5)
+		sleep(SLEEP_TIME)
 		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
 			#r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
 			r = requests.get(ledger_url, verify=False, timeout=10)
@@ -1634,7 +1634,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	for eachPlayer in allPlayerActions:
 		#print(eachPlayer)
 		if eachPlayer['player_id']:
-			behavior = Behavior.query.filter_by(player_id=eachPlayer['player_id'],game_id=game_id).all()
+			behavior = Behavior.query.filter_by(player_id=eachPlayer['player_id'], url_id=urls[which_url].id, game_id=game_id).all()
 			if not behavior:
 				new_behavior = Behavior(
 					game_id=game_id,
@@ -1741,7 +1741,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				db.session.flush()
 
 				#update bankroll
-				bankroll = Bankroll.query.filter_by(game_id=game_id, player_id=eachPlayer['player_id']).first()
+				bankroll = Bankroll.query.filter_by(game_id=game_id, url_id=urls[which_url].id, player_id=eachPlayer['player_id']).first()
 				bankroll.behavior_id = Behavior.query.filter_by(url_id=urls[which_url].id, player_id=eachPlayer['player_id']).first().id
 				bankroll.duration=sum(eachPlayer['duration_played'])
 				bankroll.hands_played=sum(eachPlayer['pre_handsPlayed'])
@@ -1890,6 +1890,7 @@ def batch_import_logs():
 	#if url log exists, run behavior
 	#if ledger is missing, try to grab it and store to s3
 	urls = Url.query.all()
+	processCount = 1
 
 	fileCheck = []
 	for url in urls:
@@ -1924,12 +1925,13 @@ def batch_import_logs():
 		#	)
 
 		#print(log_file_name, log_file_exists, ledger_file_exists)
-
+		print("Processing game "+str(processCount)+" of "+str(len(urls))+": "+url.url)
 		if log_file_exists:
 			parsedLog = parse_log(log_file_name)
 			behavior = parseBehavior(parsedLog, url.game_id, stripped_filename)
 		#else:
 			##run the bankroll part of the log parsing
+		processCount += 1
 		fileCheck.append({
 			'url': url.url,
 			'ledger_exists': ledger_file_exists,

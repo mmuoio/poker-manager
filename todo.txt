@@ -33,7 +33,7 @@ Add log import button to settlement page
 Log import button disabled after importing
 Mobile optimization
 Table toggle for player stats
-
+User dropdown on stats page for admins
 
 
 Blank logs:
