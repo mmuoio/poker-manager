@@ -494,6 +494,15 @@
 		cursor: pointer;
 		font-weight:500;
 	}
+	.bankRollRowDisabled{
+		padding-top: 5px;
+		padding-bottom: 5px;
+		background-color: rgb(187, 175, 175);
+		margin-top: 15px;
+		text-align: center;
+		cursor: no-drop;
+		font-weight:500;
+	}
 	.bankRollExpandedRow{
 		background-color: rgb(235, 231, 231);
 		padding: 5px;
@@ -520,7 +529,7 @@
 	{% set ns = namespace(balance=(bankrolls | sum(attribute="net"))) %}
 {% for br in bankrolls %}
 	
-	<div class="row bankRollRow" id="expandRow{{br.id}}">
+	<div class="row {%if br.behavior %}bankRollRow{% else %}bankRollRowDisabled{% endif %}" id="expandRow{{br.id}}">
 		<div class="col-2">{{br.date.strftime('%a, %b %d, %Y')}}</div>
 		<div class="col-2">{{br.url.small_blind}}/{{br.url.big_blind}} {{br.url.game_type}}</div>
 		<div class="col-2">{% if br.behavior %}{{seconds_to_hours_minutes(br.duration)}}{% else %} N/A {% endif %}</div>
@@ -659,9 +668,9 @@
 			type: 'line',
 			data: {
 				labels: [
-					{% for x in bankrollChartX %}
+					//{% for x in bankrollChartX %}
 					'{{x}}',
-					{% endfor %}
+					//{% endfor %}
 				],
 				
 				datasets: [{

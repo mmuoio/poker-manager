@@ -21,11 +21,19 @@ BUCKET_NAME='pokermanager'
 
 
 def isfile_s3(key: str) -> bool:
+	#return True
 	s3_resource = boto3.resource('s3')
 	bucket = s3_resource.Bucket(BUCKET_NAME)
 	"""Returns T/F whether the file exists."""
 	objs = list(bucket.objects.filter(Prefix=key))
 	return len(objs) == 1 and objs[0].key == key
+
+	#s3 = boto3.client('s3')
+	#try:
+	#	s3.head_object(Bucket=BUCKET_NAME, Key=key)
+	#	return True
+	#except ClientError:
+	#	return False
 
 views = Blueprint('views', __name__)
 
@@ -306,7 +314,6 @@ def link_players():
 		game_id = game_url_split[-1]
 		ledger_url = game_url.url + '/ledger_' + game_id + '.csv'
 	
-	
 		#####################################
 		#LOAD THE GAME, ERROR IF FAILED
 		#####################################
@@ -314,11 +321,12 @@ def link_players():
 		ledger_contents = []
 		try:
 			sleep(5)
-			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
-			#r = requests.get(ledger_url, verify=False, timeout=10)
-			for line in r.iter_lines():
-				if line:
-					ledger_contents.append(line.decode('UTF-8'))
+			#r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
+			r = requests.get(ledger_url, verify=False, timeout=10)
+			
+			#for line in r.iter_lines():
+			#	if line:
+			#		ledger_contents.append(line.decode('UTF-8'))
 			#import urllib.request
 			#urllib.request.urlretrieve(ledger_url, 'website/static/uploads/ledgers/ledger_'+game_id+'.csv')
 			#upload = s3.upload_file(
@@ -326,9 +334,12 @@ def link_players():
             #        Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
             #        Key = 'ledgers/ledger_'+game_id+'.csv'
             #    )
-			s3_resource = boto3.Session().resource('s3')
-			bucket = s3_resource.Bucket(BUCKET_NAME)
-			bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
+			if not isfile_s3('ledgers/ledger_'+game_id+'.csv'):
+				s3_resource = boto3.Session().resource('s3')
+				bucket = s3_resource.Bucket(BUCKET_NAME)
+				#bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
+				import io
+				bucket.upload_fileobj(io.BytesIO(r.content), 'ledgers/ledger_'+game_id+'.csv')
 			r.raise_for_status()
 		except ClientError as e: #(RuntimeError, TypeError, NameError):
 			#print(RuntimeError,TypeError,NameError)
@@ -345,8 +356,8 @@ def link_players():
 		#print(r.raw.read())
 		#print(ledger_contents)
 		#return 0
-		#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
-		csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
+		csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+		#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
 	
 	#####################################
 	#GET PLAYER INDEX BY PROVIDED KEY AND VALUE
@@ -365,7 +376,12 @@ def link_players():
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
-	game_date = csv_dicts[0][len(csv_dicts[0])-1]['session_start_at']
+	game_dates = []
+	for dict in csv_dicts[0]:
+		if dict['session_start_at'] != "":
+			game_dates.append(dict['session_start_at'])
+	game_date = game_dates[len(game_dates)-1]
+	
 	total_buyin = 0
 	PNDictionary = []
 	for each_dict in csv_dicts:
@@ -699,9 +715,10 @@ def import_log():
 			stripped_filename = f.filename.replace('poker_now_log_','').replace('.csv','')
 			if stripped_filename in urls:
 				#f.save(file_name)
-				s3.upload_fileobj(f, BUCKET_NAME,
-                    Key = 'logs/'+secure_filename(f.filename)
-                )
+				if not isfile_s3('logs/'+secure_filename(f.filename)):
+					s3.upload_fileobj(f, BUCKET_NAME,
+						Key = 'logs/'+secure_filename(f.filename)
+					)
 				#print('file uploaded successfully')
 
 				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
@@ -1480,18 +1497,22 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	try:
 		sleep(5)
 		if not isfile_s3('ledgers/ledger_'+game_code+'.csv'):
-			r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
-			for line in r.iter_lines():
-				if line:
-					ledger_contents.append(line.decode('UTF-8'))
+			#r = requests.get(ledger_url, verify=False, timeout=10, stream=True)
+			r = requests.get(ledger_url, verify=False, timeout=10)
+			#for line in r.iter_lines():
+			#	if line:
+			#		ledger_contents.append(line.decode('UTF-8'))
 			s3_resource = boto3.Session().resource('s3')
 			bucket = s3_resource.Bucket(BUCKET_NAME)
-			bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
+			import io
+			bucket.upload_fileobj(io.BytesIO(r.content), 'ledgers/ledger_'+game_id+'.csv')
+			#bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
 		else:
-			r = requests.get(ledger_url_s3, verify=False, timeout=10, stream=True)
-			for line in r.iter_lines():
-				if line:
-					ledger_contents.append(line.decode('UTF-8'))
+			#r = requests.get(ledger_url_s3, verify=False, timeout=10, stream=True)
+			r = requests.get(ledger_url_s3, verify=False, timeout=10)
+			#for line in r.iter_lines():
+			#	if line:
+			#		ledger_contents.append(line.decode('UTF-8'))
 		r.raise_for_status()
 	except: #(RuntimeError, TypeError, NameError):
 		#print('error')
@@ -1507,14 +1528,19 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	#GAME LOADED
 	#####################################
 
-	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
+	csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(r.text.splitlines(), skipinitialspace=True)])
+	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(ledger_contents, skipinitialspace=True)])
 	#csv_dicts.append([{k: v for k, v in row.items()} for row in csv.DictReader(csv_file, skipinitialspace=True)])
 		
 	#####################################
 	#LOOP OVER CSV FILE AND PLACE INTO DICTIONARY
 	#####################################
-	game_date = csv_dicts[0][len(csv_dicts[0])-1]['session_start_at']
-	
+	game_dates = []
+	for dict in csv_dicts[0]:
+		if dict['session_start_at'] != "":
+			game_dates.append(dict['session_start_at'])
+	game_date = game_dates[len(game_dates)-1]
+
 	def findPlayerIndexByKeyLog(PNDictionary, key, val):
 		for i, dic in enumerate(PNDictionary):
 			if isinstance(dic[key], list):
@@ -1546,7 +1572,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 					'cash_out' : float(row['buy_in']) + float(row['net']),
 					'player_id' : None
 					})
-
 	#####################################
 	#LOOP OVER THE DEBT DICT TO MATCH DATABASE PLAYERS OR SUBMITTED DATA
 	#####################################
@@ -1561,6 +1586,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		else:
 			debt['player_id'] = None
 
+	#print(PNDictionary)
 	finalLedger = []
 	for debt in PNDictionary:
 		playerIndex = findPlayerIndexByKeyLog(finalLedger, 'player_id', debt['player_id'])
@@ -1577,7 +1603,8 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 			finalLedger[playerIndex]['cash_out'] += debt['cash_out']
 		else:
 			finalLedger.append(debt)
-	
+	#print('break')
+	#print(finalLedger)
 	from datetime import datetime, timedelta
 	#print(csv_dicts[0][0])
 	game_date_utc = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0)
@@ -1588,7 +1615,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		#####################################
 		#ADD BANKROLL RECORDS
 		#####################################
-		bankroll = Bankroll.query.filter_by(game_id=game_id, player_id=eachLedger['player_id']).first()
+		bankroll = Bankroll.query.filter_by(game_id=game_id, url_id=urls[which_url].id, player_id=eachLedger['player_id']).first()
 		if not bankroll:
 			new_bankroll = Bankroll(
 				game_id=game_id,

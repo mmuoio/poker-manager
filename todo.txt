@@ -34,8 +34,6 @@ Log import button disabled after importing
 Mobile optimization
 Table toggle for player stats
 
-remove finger cursor from non-imported bankrolls
-change color slightly
 
 
 Blank logs:
