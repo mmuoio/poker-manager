@@ -4,41 +4,42 @@
 {% block content %}
 <h1 align="center">Players</h1>
 
-<table class="table">
-	<thead>
-	  <tr>
-		<th scope="col">NAME</th>
-		<th scope="col">VENMO</th>
-		<th scope="col">ALIAS</th>
-		{% if user and user.is_authenticated and user.admin %}
-		<th scope="col" align="center">NET</th>
-		{% endif %}
-	  </tr>
-	</thead>
-	<tbody>
-	{% if players %}
-	{% for player in players %}
+<div id="no-more-tables">
+	<table class="table">
+		<thead>
 		<tr>
-			<td><a href="{{url_for('views.edit_player', player_id=player.id)}}" ><strong>{{ player.name }}</strong></a></td>
-			<td>{{ player.venmo }}</td>
-			<td>
-				{% for alias in player.aliases %}
-				<span class="badge rounded-pill bg-secondary">{{ alias.alias }}</span>
-				{% endfor %}
-			</td>
+			<th scope="col">NAME</th>
+			<th scope="col">VENMO</th>
+			<th scope="col">ALIAS</th>
 			{% if user and user.is_authenticated and user.admin %}
-			<td align="center">
-				{% if player.earnings | sum(attribute='net') != 0 %}
-				{{ player.earnings | sum(attribute='net') }}
-				{% endif %}
-			</td>
+			<th scope="col" align="center">NET</th>
 			{% endif %}
 		</tr>
-	{% endfor %}
-	{% endif %}
-</tbody>
-</table>
-	
+		</thead>
+		<tbody>
+		{% if players %}
+		{% for player in players %}
+			<tr>
+				<td><a href="{{url_for('views.edit_player', player_id=player.id)}}" ><strong>{{ player.name }}</strong></a></td>
+				<td>{{ player.venmo }}</td>
+				<td>
+					{% for alias in player.aliases %}
+					<span class="badge rounded-pill bg-secondary">{{ alias.alias }}</span>
+					{% endfor %}
+				</td>
+				{% if user and user.is_authenticated and user.admin %}
+				<td align="center">
+					{% if player.earnings | sum(attribute='net') != 0 %}
+					{{ player.earnings | sum(attribute='net') }}
+					{% endif %}
+				</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+		{% endif %}
+	</tbody>
+	</table>
+</div>
 
 
 

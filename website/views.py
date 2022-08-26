@@ -1776,6 +1776,7 @@ def player_stats():
 			#player = Player.query.filter_by(id=14).first()	#Gocha
 			#player = Player.query.filter_by(id=20).first()	#Josh
 			#player = Player.query.filter_by(id=38).first()	#Sean
+			#player = Player.query.filter_by(id=15).first()	#Hans
 			print(player)
 
 

@@ -3,75 +3,77 @@
 
 {% block content %}
 <h1 align="center">Games</h1>
-<table class="table table-striped">
-	<thead>
-	  <tr>
-		<th scope="col">DATE</th>
-		<th scope="col">URLS</th>
-		<th scope="col" style="text-align:center">TYPE</th>
-		{% if user and user.is_authenticated and user.admin %}
-		<th scope="col" style="text-align:center">ACTIONS</th>
-		{% endif %}
-	  </tr>
-	</thead>
-	<tbody>
-	{% for game in games %}
+<div id="no-more-tables">
+	<table class="table table-striped">
+		<thead>
 		<tr>
-			<td style="vertical-align: middle;"><a href="{{url_for('views.payout', game_id=game.id)}}" >{{ game.date.strftime("%m/%d/%Y") }}</a></td>
-			<td style="vertical-align: middle;">
-				{% for url in game.urls %}
-				<i>{{url.url}}</i><br/>
-				{% endfor %}
-			</td>
-			<td align="center" style="vertical-align: middle;">
-				{% for url in game.urls %}
-				{% if url.game_type %}
-				{{ url.game_type}}{% if not loop.last %}<br/>{% endif %}
-				{% endif %}
-				{% endfor %}
-			</td>
+			<th scope="col">DATE</th>
+			<th scope="col">URLS</th>
+			<th scope="col" style="text-align:center">TYPE</th>
 			{% if user and user.is_authenticated and user.admin %}
-			<td align="center" style="vertical-align: middle;">
-				{% if user and user.is_authenticated and user.admin %}
-				<a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{game.id}}" data-toggle="tooltip" data-placement="top" title="Delete Game"><i class="fa fa-trash" aria-hidden="true"></i></a>
-				{% if  not game.settled %}
-				<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Settle Game"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
-				{% else %}
-				<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
-				{% endif %}
-				{% if  not imported[game.id] %}
-				<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Upload Logs"><i class="fa fa-upload" aria-hidden="true"></i></a>
-				{% else %}
-				<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-upload" aria-hidden="true"></i></a>
-				{% endif %}
-				{% endif %}
-			</td>
+			<th scope="col" style="text-align:center">ACTIONS</th>
 			{% endif %}
 		</tr>
+		</thead>
+		<tbody>
+		{% for game in games %}
+			<tr>
+				<td style="vertical-align: middle;"><a href="{{url_for('views.payout', game_id=game.id)}}" >{{ game.date.strftime("%m/%d/%Y") }}</a></td>
+				<td style="vertical-align: middle;">
+					{% for url in game.urls %}
+					<i>{{url.url}}</i><br/>
+					{% endfor %}
+				</td>
+				<td align="center" style="vertical-align: middle;">
+					{% for url in game.urls %}
+					{% if url.game_type %}
+					{{ url.game_type}}{% if not loop.last %}<br/>{% endif %}
+					{% endif %}
+					{% endfor %}
+				</td>
+				{% if user and user.is_authenticated and user.admin %}
+				<td align="center" style="vertical-align: middle;">
+					{% if user and user.is_authenticated and user.admin %}
+					<a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{game.id}}" data-toggle="tooltip" data-placement="top" title="Delete Game"><i class="fa fa-trash" aria-hidden="true"></i></a>
+					{% if  not game.settled %}
+					<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Settle Game"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
+					{% else %}
+					<a href="{{url_for('views.link_players', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-list-ul" aria-hidden="true"></i></a>
+					{% endif %}
+					{% if  not imported[game.id] %}
+					<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Upload Logs"><i class="fa fa-upload" aria-hidden="true"></i></a>
+					{% else %}
+					<a href="{{url_for('views.import_log', game_id=game.id)}}" class="btn btn-sm btn-outline-secondary disabled"><i class="fa fa-upload" aria-hidden="true"></i></a>
+					{% endif %}
+					{% endif %}
+				</td>
+				{% endif %}
+			</tr>
 
-		<div class="modal fade" id="confirmDelete_{{game.id}}" tabindex="-1" aria-labelledby="confirmDelete_{{game.id}}Label" aria-hidden="true">
-			<div class="modal-dialog">
-			  <div class="modal-content">
-				<div class="modal-header">
-				  <h5 class="modal-title" id="confirmDelete_{{game.id}}Label">Delete this game?</h5>
-				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			<div class="modal fade" id="confirmDelete_{{game.id}}" tabindex="-1" aria-labelledby="confirmDelete_{{game.id}}Label" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+					<h5 class="modal-title" id="confirmDelete_{{game.id}}Label">Delete this game?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body text-wrap">
+						<b>{{ game.date.strftime("%m/%d/%Y") }}</b><br/>
+							{% for url in game.urls %}
+							<i>{{url.url}}</i><br/>
+							{% endfor %}
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<a href="{{url_for('views.delete_game', game_id=game.id)}}" type="button" class="btn btn-primary" >Delete Game</a>
+					</div>
 				</div>
-				<div class="modal-body text-wrap">
-					<b>{{ game.date.strftime("%m/%d/%Y") }}</b><br/>
-						{% for url in game.urls %}
-						<i>{{url.url}}</i><br/>
-						{% endfor %}
 				</div>
-				<div class="modal-footer">
-				  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-				  <a href="{{url_for('views.delete_game', game_id=game.id)}}" type="button" class="btn btn-primary" >Delete Game</a>
-				</div>
-			  </div>
 			</div>
-		  </div>
-	{% endfor %}
-</tbody>
-</table>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
 
 <script type="text/javascript">
 	$(document).ready(function () {

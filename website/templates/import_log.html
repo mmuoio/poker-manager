@@ -4,64 +4,66 @@
 {% block content %}
 <h1 align="center">Import Logs</h1>
 
-<table class="table table-striped">
-	<thead>
-	  <tr>
-		<th scope="col">DATE</th>
-		<th scope="col">URLS</th>
-		<th scope="col" style="text-align:center">TYPE</th>
-		<th scope="col" style="text-align:center">IMPORTED</th>
-		{% if user and user.is_authenticated and user.admin %}
-		<th scope="col" style="text-align:center">ACTIONS</th>
-		{% endif %}
-	  </tr>
-	</thead>
-	<tbody>
-	{% for url in game.urls %}
+<div id="no-more-tables">
+	<table class="table table-striped">
+		<thead>
 		<tr>
-			<td style="vertical-align: middle;">{{ game.date.strftime("%m/%d/%Y") }}</td>
-			<td style="vertical-align: middle;">
-				{{url.url}}
-			</td>
-			<td align="center" style="vertical-align: middle;">NLHE</td>
-			<td align="center" style="vertical-align: middle;">
-				{% if url.imported %}<i class="fa fa-check-circle-o text-success" style="font-size:20pt" aria-hidden="true"></i>{% else %}<i class="fa fa-times-circle-o text-danger" style="font-size:20pt" aria-hidden="true"></i>{% endif %}
-			</td>
+			<th scope="col">DATE</th>
+			<th scope="col">URLS</th>
+			<th scope="col" style="text-align:center">TYPE</th>
+			<th scope="col" style="text-align:center">IMPORTED</th>
 			{% if user and user.is_authenticated and user.admin %}
-			<td align="center" style="vertical-align: middle;">
-				{% if user and user.is_authenticated and user.admin %}
-				
-				{% if not url.imported %}
-				<a href="#" class="btn btn-sm btn-outline-secondary disabled" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{url.id}}" data-toggle="tooltip" data-placement="top" title="Delete Log"><i class="fa fa-trash" aria-hidden="true"></i></a>
-				{% else %}
-				<a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{url.id}}" data-toggle="tooltip" data-placement="top" title="Delete Log"><i class="fa fa-trash" aria-hidden="true"></i></a>
-				{% endif %}
-				{% endif %}
-			</td>
+			<th scope="col" style="text-align:center">ACTIONS</th>
 			{% endif %}
 		</tr>
+		</thead>
+		<tbody>
+		{% for url in game.urls %}
+			<tr>
+				<td style="vertical-align: middle;">{{ game.date.strftime("%m/%d/%Y") }}</td>
+				<td style="vertical-align: middle;">
+					{{url.url}}
+				</td>
+				<td align="center" style="vertical-align: middle;">NLHE</td>
+				<td align="center" style="vertical-align: middle;">
+					{% if url.imported %}<i class="fa fa-check-circle-o text-success" style="font-size:20pt" aria-hidden="true"></i>{% else %}<i class="fa fa-times-circle-o text-danger" style="font-size:20pt" aria-hidden="true"></i>{% endif %}
+				</td>
+				{% if user and user.is_authenticated and user.admin %}
+				<td align="center" style="vertical-align: middle;">
+					{% if user and user.is_authenticated and user.admin %}
+					
+					{% if not url.imported %}
+					<a href="#" class="btn btn-sm btn-outline-secondary disabled" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{url.id}}" data-toggle="tooltip" data-placement="top" title="Delete Log"><i class="fa fa-trash" aria-hidden="true"></i></a>
+					{% else %}
+					<a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#confirmDelete_{{url.id}}" data-toggle="tooltip" data-placement="top" title="Delete Log"><i class="fa fa-trash" aria-hidden="true"></i></a>
+					{% endif %}
+					{% endif %}
+				</td>
+				{% endif %}
+			</tr>
 
-		<div class="modal fade" id="confirmDelete_{{url.id}}" tabindex="-1" aria-labelledby="confirmDelete_{{url.id}}Label" aria-hidden="true">
-			<div class="modal-dialog">
-			  <div class="modal-content">
-				<div class="modal-header">
-				  <h5 class="modal-title" id="confirmDelete_{{url.id}}Label">Delete this log?</h5>
-				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			<div class="modal fade" id="confirmDelete_{{url.id}}" tabindex="-1" aria-labelledby="confirmDelete_{{url.id}}Label" aria-hidden="true">
+				<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+					<h5 class="modal-title" id="confirmDelete_{{url.id}}Label">Delete this log?</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body text-wrap">
+						<b>{{ game.date.strftime("%m/%d/%Y") }}</b><br/>
+							<i>{{url.url}}</i><br/>
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<a href="{{url_for('views.delete_log', url_id=url.id)}}" type="button" class="btn btn-primary" >Delete Log</a> <!--FIX THIS TO BE FOR LOGS, NOT GAMES-->
+					</div>
 				</div>
-				<div class="modal-body text-wrap">
-					<b>{{ game.date.strftime("%m/%d/%Y") }}</b><br/>
-						<i>{{url.url}}</i><br/>
 				</div>
-				<div class="modal-footer">
-				  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-				  <a href="{{url_for('views.delete_log', url_id=url.id)}}" type="button" class="btn btn-primary" >Delete Log</a> <!--FIX THIS TO BE FOR LOGS, NOT GAMES-->
-				</div>
-			  </div>
 			</div>
-		  </div>
-	{% endfor %}
-</tbody>
-</table>
+		{% endfor %}
+	</tbody>
+	</table>
+</div>
 
 <script type="text/javascript">
 	$(document).ready(function () {
