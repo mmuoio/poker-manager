@@ -7,13 +7,13 @@ from . import db
 import json, requests, csv
 from io import StringIO
 from functools import wraps
-
 import boto3
+import os
 
 
 s3 = boto3.client('s3',
-                    aws_access_key_id='AKIAYX7T7SKTAWVRLH56',
-                    aws_secret_access_key= '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',
+                    aws_access_key_id=os.environ('AWS_ACCESS_KEY_ID'),
+                    aws_secret_access_key= os.environ('AWS_SECRET_ACCESS_KEY'),
 					region_name='us-east-1'
                      )
 BUCKET_NAME='pokermanager'
