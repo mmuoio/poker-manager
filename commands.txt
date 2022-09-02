@@ -2,11 +2,6 @@
 flask db migrate -m 'test migration'
 flask db upgrade
 
-git commit -am 'trying to fix this'
-git push
-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
-git push heroku main
-
 heroku pg:info
 
 git config credential.helper store
