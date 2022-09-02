@@ -14,7 +14,6 @@ import boto3
 s3 = boto3.client('s3',
                     aws_access_key_id='AKIAYX7T7SKTAWVRLH56',
                     aws_secret_access_key= '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',
-                    #aws_session_token='secret token here'
 					region_name='us-east-1'
                      )
 BUCKET_NAME='pokermanager'
@@ -60,7 +59,6 @@ def admin_required(f):
 def sub_required(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
-		#print(current_user.admin)
 		if current_user.is_anonymous:
 			return redirect(url_for('auth.login'))
 		if current_user and current_user.subscribed:
@@ -72,7 +70,6 @@ def sub_required(f):
 def can_upload(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
-		#print(current_user.admin)
 		if current_user.is_anonymous:
 			return redirect(url_for('auth.login'))
 		if current_user and current_user.can_upload:
@@ -81,36 +78,14 @@ def can_upload(f):
 			return redirect(url_for('auth.login'))
 	return decorated_function
 
-@views.route('/home', methods=['GET', 'POST'])
-#@login_required
-def home():
-	# if request.method == 'POST':
-	# 	note = request.form.get('note')
 
-	# 	if len(note) < 1:
-	# 		flash('Note is too short.', category='error')
-	# 	else:
-	# 		new_note = Note(data=note, user_id=current_user.id)
-	# 		db.session.add(new_note)
-	# 		db.session.commit()
-	# 		flash('Note added!', category='success')
+@views.route('/home', methods=['GET', 'POST'])
+def home():
 	return render_template("home.html")
 
 
-
 @views.route('/', methods=['GET', 'POST'])
-#@login_required
 def index():
-	# if request.method == 'POST':
-	# 	note = request.form.get('note')
-
-	# 	if len(note) < 1:
-	# 		flash('Note is too short.', category='error')
-	# 	else:
-	# 		new_note = Note(data=note, user_id=current_user.id)
-	# 		db.session.add(new_note)
-	# 		db.session.commit()
-	# 		flash('Note added!', category='success')
 	return redirect(url_for('views.games'))
 
 #@views.route('/delete-note', methods=['POST'])
@@ -246,7 +221,6 @@ def import_game():
 					new_url = Url(url = game_url, game_id=new_game.id)
 					db.session.add(new_url)
 			db.session.commit()
-			#flash('Game imported', category='success')
 			return redirect(url_for('views.link_players', game_id=new_game.id))
 		else:
 			flash("Please enter a URL.", category="error")
@@ -289,13 +263,8 @@ def link_players():
 			processLedger = 1
 
 		
-	#print(request.form)
 	game = Game.query.filter_by(id=request.args.get('game_id')).first()
 	game_urls = game.urls
-	
-	#players = Player.query.all()
-	#return render_template("link_players.html", user=current_user, players=players)
-
 
 
 	from time import sleep
@@ -342,9 +311,8 @@ def link_players():
 				bucket.upload_fileobj(io.BytesIO(r.content), 'ledgers/ledger_'+game_id+'.csv')
 			r.raise_for_status()
 		except ClientError as e: #(RuntimeError, TypeError, NameError):
-			#print(RuntimeError,TypeError,NameError)
-			print(ClientError)
-			flash("There was an error loading importing the game1.", category="error")
+			#print(ClientError)
+			flash("There was an error loading importing the game.", category="error")
 			return render_template("import_game.html", user=current_user)
 		if r.status_code != 200:
 			flash("There was an error loading importing the game2.", category="error")
@@ -364,7 +332,6 @@ def link_players():
 	#####################################
 	def findPlayerIndexByKey(PNDictionary, key, val):
 		for i, dic in enumerate(PNDictionary):
-			#print(val, dic[key])
 			if isinstance(dic[key], list):
 				if val in dic[key]:
 					return i
@@ -416,10 +383,6 @@ def link_players():
 
 				if alias:
 					debt['player_id'] = alias.player_id
-
-	#for x in PNDictionary:
-	#	print(x)
-	#print('break')
 	
 	players = Player.query.order_by(Player.name).all()
 	if not processLedger:
@@ -431,7 +394,6 @@ def link_players():
 	finalLedger = []
 	for debt in PNDictionary:
 		playerIndex = findPlayerIndexByKey(finalLedger, 'player_id', debt['player_id'])
-		#print(debt['player_nickname'], debt['player_id'], playerIndex)
 		if playerIndex >= 0:
 			for eachID in debt['pn_player_id']:
 				if eachID not in finalLedger[playerIndex]['pn_player_id']:
@@ -444,10 +406,6 @@ def link_players():
 			finalLedger[playerIndex]['balance'] += debt['balance']
 		else:
 			finalLedger.append(debt)
-	#for eachDebt in finalLedger:
-	#	print(eachDebt)
-
-
 
 
 
@@ -455,17 +413,6 @@ def link_players():
 	#####################################
 	#AFTER HERE SHOULD BE DONE ON POST
 	#####################################
-
-
-	
-	# PNDictionary = [
-	# 	{'pn_player_id': 'ID_A', 'pn_player_nickname' : 'PlayerA', 'net': 1000, 'balance': 1000},
-	# 	{'pn_player_id': 'ID_B', 'pn_player_nickname' : 'PlayerB', 'net': 500, 'balance': 500},
-	# 	{'pn_player_id': 'ID_C', 'pn_player_nickname' : 'PlayerC', 'net': 150, 'balance': 150},
-	# 	{'pn_player_id': 'ID_D', 'pn_player_nickname' : 'PlayerD', 'net': -50, 'balance': -50},
-	# 	{'pn_player_id': 'ID_E', 'pn_player_nickname' : 'PlayerE', 'net': -350, 'balance': -350},
-	# 	{'pn_player_id': 'ID_F', 'pn_player_nickname' : 'PlayerF', 'net': -1250, 'balance': -1250}
-	# ]
 
 	#####################################
 	#CHECKS TO SEE IF ANY PLAYER HAS A REMAINING BALANCE
@@ -511,15 +458,6 @@ def link_players():
 	delta = timedelta(hours=9)
 	game_date_est = game_date_utc - delta
 	
-	# print("year: " + game_date[0:4])
-	# print("month: " + game_date[5:7])
-	# print("day: " + game_date[8:10])
-	# print("hour: " + game_date[11:13])
-	# print("minute: " + game_date[14:16])
-	#print(game_date_utc)
-	#print(game_date_est)
-	#print(game_date_est.strftime('%Y-%m-%d %H:%M:%S'))
-	#game_date = datetime(int(game_date[0:4]),int(game_date[5:7]),int(game_date[8:10]),int(game_date[11:13]),int(game_date[14:16]), 0, 0,timezone.est)
 	game.date = game_date_est
 	game.settled = True
 	game.buyins = total_buyin
@@ -557,16 +495,8 @@ def link_players():
 
 	
 	db.session.commit()
-	
-	
-	#for debt in debts:
-	#	print(debt)
-	
 	###REDIRECT TO DISPLAY PAGE
 
-
-	
-	#return render_template("link_players.html", user=current_user, players=players, ledger=PNDictionary)
 	return redirect(url_for('views.payout', game_id=game.id))
 
 @views.route('/payout', methods=['GET', 'POST'])
@@ -579,8 +509,6 @@ def payout():
 	payments = Payment.query.filter_by(game_id=game_id)
 	earnings = Earning.query.order_by(Earning.net.desc()).filter_by(game_id=game_id)
 	players = Player.query.all()
-	#print(payments)
-	#print(players)
 
 	new_earnings = []
 	total_payouts = 0
@@ -607,7 +535,6 @@ def games():
 					urls[game.id] = url.imported
 			else:
 				urls[game.id] = url.imported
-	#print(urls)
 			
 
 	return render_template("games.html", user=current_user, games=games, imported=urls)
@@ -620,7 +547,6 @@ def export_settlement():
 	si = StringIO()
 	cw = csv.writer(si)
 	records = Payment.query.filter_by(game_id=game_id)
-	
 	
 	# any table method that extracts an iterable will work
 	cw.writerows([('From','To','Venmo','Amount')])
@@ -659,8 +585,6 @@ def delete_game():
 	if game:
 		db.session.delete(game)
 	db.session.commit()
-	#games = Game.query.all()
-	#return render_template("games.html", user=current_user, games=games)
 	return redirect(url_for('views.games'))
 
 	
@@ -724,7 +648,6 @@ def import_log():
 				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
 				parsedLog = parse_log(ledger_url_s3)
 				
-				print(parsedLog)
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
 				#for each in behavior:
 				#	print(each)
@@ -1077,9 +1000,7 @@ def parse_log(csv_file):
 				players.append([row['player'],row['playerId'],alias.player_id])
 			else:
 				players.append([row['player'],row['playerId'],None])
-	#for hand in stacks:
-	#	print(hand)	
-	#print(len(hands))
+
 	return {
 		'players': players,
 		'numberOfHands': handNumber,
@@ -1095,9 +1016,6 @@ def parse_log(csv_file):
 
 @can_upload
 def parseBehavior(pokerGame, game_id, stripped_filename):
-	colorsDark = ['rgba(0,129,0,1)','rgba(0,0,255,1)','rgba(255,0,0,1)','rgba(255,165,0,1)','rgba(128,0,128,1)','rgba(139,69,19,1)','rgba(0,0,0,1)', 'rgb(255,20,147,1)', 'rgba(47,79,79,1)']
-	colorsLight = ['rgba(0,129,0,0.5)','rgba(0,0,255,0.5)','rgba(255,0,0,0.5)','rgba(255,165,0,0.5)','rgba(128,0,128,0.5)','rgba(139,69,19,0.5)','rgba(0,0,0,0.5)', 'rgb(255,20,147,0.5)', 'rgba(47,79,79,0.5)']
-	
 	hands = range(1,pokerGame['numberOfHands']+1)
 	from datetime import datetime, timedelta
 	allPreflopAction = []
@@ -1147,11 +1065,8 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 				riverAction.append(action)
 				#print(action)
 	
-		#game_date = datetime.strptime(game_date, "%Y-%m-%dT%H:%M:%SZ")
-		#print(handStart)
 		handStartDateTime = datetime(int(handStart[0:4]),int(handStart[5:7]),int(handStart[8:10]),int(handStart[11:13]),int(handStart[14:16]), int(handStart[17:19]), 0)
 		handEndDateTime = datetime(int(handEnd[0:4]),int(handEnd[5:7]),int(handEnd[8:10]),int(handEnd[11:13]),int(handEnd[14:16]), int(handEnd[17:19]), 0)
-		#print(hand, (handEndDateTime-handStartDateTime).total_seconds(), handStart, handEnd)
 
 		#this is still called allPreflopAction but it has all hand action in it, consider fixing
 		allPreflopAction.append({
@@ -1164,7 +1079,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 			'riverAction':riverAction,
 			'handDuration': (handEndDateTime-handStartDateTime).total_seconds()
 			})
-	#print(allPreflopAction)
 		
 
 	combinedPlayerList = {}
@@ -1220,7 +1134,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 
 	def findPlayerIndexByKey(key, val):
 		for i, dic in enumerate(allPlayerActions):
-			#print(val, dic[key])
 			if isinstance(dic[key], list):
 				if val in dic[key]:
 					return i
@@ -1230,7 +1143,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		return -1
 
 	# Calculate VPIP and PFR
-
 	def incrementCount(current, size, amount=1):
 		if size <= 2:
 			current[0] += amount
@@ -1468,8 +1380,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 		for each in [*set(wtsd)]:
 			allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'] = incrementCount(allPlayerActions[findPlayerIndexByKey('names', each)]['wtsd'], hand['numPlayers'])
 
-	#for each in allPlayerActions:
-	#	print(each)
 	urls = Url.query.filter_by(game_id=game_id).all()
 	which_url = None
 	for i, url in enumerate(urls):
@@ -1742,7 +1652,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 
 				#update bankroll
 				bankroll = Bankroll.query.filter_by(game_id=game_id, url_id=urls[which_url].id, player_id=eachPlayer['player_id']).first()
-				bankroll.behavior_id = Behavior.query.filter_by(url_id=urls[which_url].id, player_id=eachPlayer['player_id']).first().id
+				bankroll.behavior_id = Behavior.query.filter_by(player_id=eachPlayer['player_id'], url_id=urls[which_url].id, game_id=game_id).first().id
 				bankroll.duration=sum(eachPlayer['duration_played'])
 				bankroll.hands_played=sum(eachPlayer['pre_handsPlayed'])
 
@@ -1754,9 +1664,7 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	if pokerGame['gameType']: urls[which_url].game_type = pokerGame['gameType']
 	if pokerGame['bigBlind']: urls[which_url].big_blind = pokerGame['bigBlind']
 	if pokerGame['smallBlind']: urls[which_url].small_blind = pokerGame['smallBlind']
-	#for eachAction in pokerGame['adminActions']:
-	#	print(eachAction)
-	#print(pokerGame['adminActions'])
+
 	db.session.commit()
 
 	return allPlayerActions

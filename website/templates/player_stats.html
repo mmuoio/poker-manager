@@ -15,468 +15,335 @@
 
 <hr/>
 
-
-<div class="float-end" style="margin-right:10px">
-	<a href="#" id="popover" class="btn btn-primary" data-bs-placement="bottom"><i class="fa fa-filter" aria-hidden="true"></i></a>
-	<div id="popover-content" style="display: none;">
-		<form class="form" method="post" style="font-size:17px">
-			<div class="form-check form-switch mb-3">
-			<input type="checkbox" name="filter_nlhe" class="form-control form-check-input" role="switch" {% if nlhe %}checked{% endif %}> <label for="filter_nlhe">NLHE</label>
-			</div>
-			<div class="form-check form-switch mb-3">
-			<input type="checkbox" name="filter_plo" class="form-control form-check-input" role="switch" {% if plo %}checked{% endif %}> <label for="filter_nlhe">PLO</label>
-			</div>
-			<div class="form-check form-switch mb-3">
-			<input type="checkbox" name="filter_plo8" class="form-control form-check-input" role="switch" {% if plo8 %}checked{% endif %}> <label for="filter_nlhe">PLO8</label>
-			</div>
-			<div class="mb-3">
-			<button type="submit" class="btn btn-primary">Filter</button>
-
-			<a href="player_stats" class="btn btn-secondary">Clear</a>
-			</div>
-		</form>
+<div class="row">
+	<div class="col-8">
+	<h3 style="padding-left: 6px;">Statistics</h3>
 	</div>
+	<div class="col-4" style="text-align: right; padding-right:20px;">
+		<a href="#" id="popover" class="btn btn-primary" data-bs-placement="bottom"><i class="fa fa-filter" aria-hidden="true"></i></a>
+		<div id="popover-content" style="display: none;">
+			<form class="form" method="post" style="font-size:17px">
+				<div class="form-check form-switch mb-3">
+				<input type="checkbox" name="filter_nlhe" class="form-control form-check-input" role="switch" {% if nlhe %}checked{% endif %}> <label for="filter_nlhe">NLHE</label>
+				</div>
+				<div class="form-check form-switch mb-3">
+				<input type="checkbox" name="filter_plo" class="form-control form-check-input" role="switch" {% if plo %}checked{% endif %}> <label for="filter_nlhe">PLO</label>
+				</div>
+				<div class="form-check form-switch mb-3">
+				<input type="checkbox" name="filter_plo8" class="form-control form-check-input" role="switch" {% if plo8 %}checked{% endif %}> <label for="filter_nlhe">PLO8</label>
+				</div>
+				<div class="mb-3">
+				<button type="submit" class="btn btn-primary">Filter</button>
+
+				<a href="player_stats" class="btn btn-secondary">Clear</a>
+				</div>
+			</form>
+		</div>
 	</div>
-<h3 style="padding-left: 6px;">Statistics</h3>
+</div>
 
 {% if bankrolls %}
 <div class="row">
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+			<h5 class="card-title text-muted">Bankroll</h5>
+			<h3 class="mt-3 mb-3 {% if bankrolls | sum(attribute="net") > 0 %}text-success{% else %}text-danger {% endif %}" style="text-align:center;">${{ "{:,}".format(bankrolls | sum(attribute="net"))}}</h3>
+			<div class="text-muted sub-card">
+				ROI: {{ "{:,.2f}".format((bankrolls | sum(attribute="net") /  (bankrolls | sum(attribute="buyin")) * 100) | round(2))}}%
+			</div>
+			</div>
+		</div>
+	</div>
 
-	<!--<div class="col-xl-6 col-lg-6">
-		<table class="table col col-6">
-			<thead>
-				<tr>
-					<th colspan="5">Betting</th>
-				</tr>
-			  <tr>
-				<th scope="col"></th>
-				<th scope="col">Overall</th>
-				<th scope="col">Heads Up</th>
-				<th scope="col">Short Ring</th>
-				<th scope="col">Full Table</th>
-			  </tr>
-			</thead>
-			<tbody>
-				<tr>
-				  <td>VPIP</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>PFR</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>FA</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>C-bet</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>Double Barrel</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>Triple Barrel</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>3 Bet Pre</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-				<tr>
-				  <td>4 Bet Pre</td>
-				  <td>50%</td>
-				  <td>40%</td>
-				  <td>35%</td>
-				  <td>90%</td>
-				</tr>
-	
-	
-			</tbody>
-		  </table>
-		  </div>
-		  <div class="col-xl-6 col-lg-6">
-			<table class="table col col-6">
-				<thead>
-					<tr>
-						<th colspan="5">Folding</th>
-					</tr>
-				  <tr>
-					<th scope="col"></th>
-					<th scope="col">Overall</th>
-					<th scope="col">Heads Up</th>
-					<th scope="col">Short Ring</th>
-					<th scope="col">Full Table</th>
-				  </tr>
-				</thead>
-				<tbody>
-					<tr>
-					  <td>vs C-bet</td>
-					  <td>50%</td>
-					  <td>40%</td>
-					  <td>35%</td>
-					  <td>90%</td>
-					</tr>
-					<tr>
-					  <td>vs Double Barrel</td>
-					  <td>50%</td>
-					  <td>40%</td>
-					  <td>35%</td>
-					  <td>90%</td>
-					</tr>
-					<tr>
-					  <td>vs Triple Barrle</td>
-					  <td>50%</td>
-					  <td>40%</td>
-					  <td>35%</td>
-					  <td>90%</td>
-					</tr>
-					<tr>
-					  <td>vs 3-bet</td>
-					  <td>50%</td>
-					  <td>40%</td>
-					  <td>35%</td>
-					  <td>90%</td>
-					</tr>
-		
-		
-				</tbody>
-			  </table>
-			  </div>-->
-
-	<div class="col-xl-12 col-lg-6">
-
-		<div class="row">
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-					<h5 class="card-title text-muted">Bankroll</h5>
-					<h3 class="mt-3 mb-3 {% if bankrolls | sum(attribute="net") > 0 %}text-success{% else %}text-danger {% endif %}" style="text-align:center;">${{ "{:,}".format(bankrolls | sum(attribute="net"))}}</h3>
-					<div class="text-muted sub-card">
-						ROI: {{ "{:,.2f}".format((bankrolls | sum(attribute="net") /  (bankrolls | sum(attribute="buyin")) * 100) | round(2))}}%
-					</div>
-					</div>
-				</div>
-			  </div>
-
-			  <div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-					<h5 class="card-title text-muted">Time Played</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{{(pb['duration_played'][3]/3600)|round(2)}} hours</h3>
-						<div class="text-muted sub-card">
-							HU: {{(pb['duration_played'][0]/3600)|round(1)}} |
-							SR: {{(pb['duration_played'][1]/3600)|round(1)}} |
-							FT: {{(pb['duration_played'][2]/3600)|round(1)}}
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-					<h5 class="card-title text-muted">Sessions</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{{bankrolls | length}} games</h3>
-						<div class="text-muted sub-card">
-							W: {{ wl[0] }} |
-							L: {{ wl[1] }}
-							
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-					<h5 class="card-title text-muted">Hands played</h5>
-					<h3 class="mt-3 mb-3" style="text-align:center;">{{ "{:,}".format(pb['pre_hands_played'][3]) }}</h3>
-					<div class="text-muted sub-card">
-						HU: {{"{:,}".format(pb['pre_hands_played'][0])}} |
-						SR: {{"{:,}".format(pb['pre_hands_played'][1])}} |
-						FT: {{"{:,}".format(pb['pre_hands_played'][2])}}
-					</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-<!---->
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-					<a href="#" class="text-muted float-end"
-							data-bs-toggle="tooltip" data-bs-placement="top"
-							data-bs-custom-class="custom-tooltip"
-							data-bs-title="Voluntarily Put $ in Pot (VPIP) - How often you voluntarily invested money into a hand.">
-						<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">VPIP</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['pre_hands_played'][3]-pb['pre_hands_raised'][3]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][3]/(pb['pre_hands_played'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][0]/(pb['pre_hands_played'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['pre_hands_played'][1]-pb['pre_hands_raised'][1]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][1]/(pb['pre_hands_played'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['pre_hands_played'][2]-pb['pre_hands_raised'][2]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][2]/(pb['pre_hands_played'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Preflop Raise (PFR) - How often you have raised before the flop is seen.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">PFR</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if pb['pre_hands_participated'][3] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][3]/pb['pre_hands_participated'][3] * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if pb['pre_hands_participated'][0] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][0]/pb['pre_hands_participated'][0] * 100)|round()|int}}% {% endif %} |
-							SR: {% if pb['pre_hands_participated'][1] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][1]/pb['pre_hands_participated'][1] * 100)|round()|int}}% {% endif %} |
-							FT: {% if pb['pre_hands_participated'][2] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][2]/pb['pre_hands_participated'][2] * 100)|round()|int}}% {% endif %}
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Postflop Aggression Factor (AF) - This is calculated by counting the number of hands in which you’ve either bet or raised post-flop, then dividing this by the number of hands in which you’ve called post-flop.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Flop Aggression</h5>
-					<h3 class="mt-3 mb-3" style="text-align:center;">{% if pb['post_hands_call'][3] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][3]/pb['post_hands_call'][3] )|round(1)}} {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if pb['post_hands_call'][0] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][0]/pb['post_hands_call'][0])|round(1)}} {% endif %} |
-							SR: {% if pb['post_hands_call'][1] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][1]/pb['post_hands_call'][1])|round(1)}} {% endif %} |
-							FT: {% if pb['post_hands_call'][2] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][2]/pb['post_hands_call'][2])|round(1)}} {% endif %}
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Continuation Bet (CBET) - A continuation bet is when you were the last to raise preflop, and hence the aggressor, and you continued that aggression on the flop by being the first to bet.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">C-bet</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['cbet'][3]+pb['cbet_check_fold'][3]) == 0 %} -- {% else %} {{(pb['cbet'][3]/(pb['cbet'][3]+pb['cbet_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['cbet'][0]+pb['cbet_check_fold'][0]) == 0 %} -- {% else %} {{(pb['cbet'][0]/(pb['cbet'][0]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['cbet'][1]+pb['cbet_check_fold'][1]) == 0 %} -- {% else %} {{(pb['cbet'][1]/(pb['cbet'][1]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['cbet'][2]+pb['cbet_check_fold'][2]) == 0 %} -- {% else %} {{(pb['cbet'][2]/(pb['cbet'][2]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div> <!-- end card-body-->
-				</div> <!-- end card-->
-			</div> <!-- end col-->
-
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Double Barrel (2B) - The number of turns you continued the aggression after continuation betting.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Double Barrel (2B)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['2barrel'][3]+pb['2barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['2barrel'][3]/(pb['2barrel'][3]+pb['2barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['2barrel'][0]+pb['2barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['2barrel'][0]/(pb['2barrel'][0]+pb['2barrel_check_fold'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['2barrel'][1]+pb['2barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['2barrel'][1]/(pb['2barrel'][1]+pb['2barrel_check_fold'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['2barrel'][2]+pb['2barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['2barrel'][2]/(pb['2barrel'][2]+pb['2barrel_check_fold'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+			<h5 class="card-title text-muted">Time Played</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{{(pb['duration_played'][3]/3600)|round(2)}} hours</h3>
+				<div class="text-muted sub-card">
+					HU: {{(pb['duration_played'][0]/3600)|round(1)}} |
+					SR: {{(pb['duration_played'][1]/3600)|round(1)}} |
+					FT: {{(pb['duration_played'][2]/3600)|round(1)}}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Triple Barrel (3Ba) - The number of rivers you continued the aggression after double barreling.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Triple Barrel (3Ba)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3barrel'][3]+pb['3barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['3barrel'][3]/(pb['3barrel'][3]+pb['3barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['3barrel'][0]+pb['3barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['3barrel'][0]/(pb['3barrel'][0]+pb['3barrel_check_fold'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['3barrel'][1]+pb['3barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['3barrel'][1]/(pb['3barrel'][1]+pb['3barrel_check_fold'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['3barrel'][2]+pb['3barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['3barrel'][2]/(pb['3barrel'][2]+pb['3barrel_check_fold'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+			<h5 class="card-title text-muted">Sessions</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{{bankrolls | length}} games</h3>
+				<div class="text-muted sub-card">
+					W: {{ wl[0] }} |
+					L: {{ wl[1] }}
+					
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Three-bet Pre-flop (3B) - This is a measure of how often you three-bet pre-flop. In pre-flop betting, to three-bet is to raise after exactly one other player has raised.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">3 Bet Preflop (3B)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3bet'][3]+pb['no_3bet'][3]) == 0 %} -- {% else %} {{(pb['3bet'][3]/(pb['3bet'][3]+pb['no_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['3bet'][0]+pb['no_3bet'][0]) == 0 %} -- {% else %} {{(pb['3bet'][0]/(pb['3bet'][0]+pb['no_3bet'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['3bet'][1]+pb['no_3bet'][1]) == 0 %} -- {% else %} {{(pb['3bet'][1]/(pb['3bet'][1]+pb['no_3bet'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['3bet'][2]+pb['no_3bet'][2]) == 0 %} -- {% else %} {{(pb['3bet'][2]/(pb['3bet'][2]+pb['no_3bet'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+			<h5 class="card-title text-muted">Hands played</h5>
+			<h3 class="mt-3 mb-3" style="text-align:center;">{{ "{:,}".format(pb['pre_hands_played'][3]) }}</h3>
+			<div class="text-muted sub-card">
+				HU: {{"{:,}".format(pb['pre_hands_played'][0])}} |
+				SR: {{"{:,}".format(pb['pre_hands_played'][1])}} |
+				FT: {{"{:,}".format(pb['pre_hands_played'][2])}}
+			</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+			<a href="#" class="text-muted float-end"
+					data-bs-toggle="tooltip" data-bs-placement="top"
+					data-bs-custom-class="custom-tooltip"
+					data-bs-title="Voluntarily Put $ in Pot (VPIP) - How often you voluntarily invested money into a hand.">
+				<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">VPIP</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['pre_hands_played'][3]-pb['pre_hands_raised'][3]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][3]/(pb['pre_hands_played'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['pre_hands_played'][0]-pb['pre_hands_raised'][0]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][0]/(pb['pre_hands_played'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['pre_hands_played'][1]-pb['pre_hands_raised'][1]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][1]/(pb['pre_hands_played'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['pre_hands_played'][2]-pb['pre_hands_raised'][2]) == 0 %} -- {% else %} {{(pb['pre_hands_participated'][2]/(pb['pre_hands_played'][2]) * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Four-bet Preflop (4B) - This is a measure of how often you four-bet pre-flop. Four-betting is similar to three- betting, except that you are re-raising after a player has already re-raised.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">4 Bet Preflop (4B)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['4bet'][3]+pb['no_4bet'][3]) == 0 %} -- {% else %} {{(pb['4bet'][3]/(pb['4bet'][3]+pb['no_4bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['4bet'][0]+pb['no_4bet'][0]) == 0 %} -- {% else %} {{(pb['4bet'][0]/(pb['4bet'][0]+pb['no_4bet'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['4bet'][1]+pb['no_4bet'][1]) == 0 %} -- {% else %} {{(pb['4bet'][1]/(pb['4bet'][1]+pb['no_4bet'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['4bet'][2]+pb['no_4bet'][2]) == 0 %} -- {% else %} {{(pb['4bet'][2]/(pb['4bet'][2]+pb['no_4bet'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Preflop Raise (PFR) - How often you have raised before the flop is seen.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">PFR</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if pb['pre_hands_participated'][3] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][3]/pb['pre_hands_participated'][3] * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if pb['pre_hands_participated'][0] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][0]/pb['pre_hands_participated'][0] * 100)|round()|int}}% {% endif %} |
+					SR: {% if pb['pre_hands_participated'][1] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][1]/pb['pre_hands_participated'][1] * 100)|round()|int}}% {% endif %} |
+					FT: {% if pb['pre_hands_participated'][2] == 0 %} -- {% else %} {{(pb['pre_hands_raised'][2]/pb['pre_hands_participated'][2] * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Folded to Continuation Bet (FC) - This indicates how you often you fold when you are facing a continuation bet on the flop.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Fold to Cbet (FC)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) == 0 %} -- {% else %} {{(pb['fold_cbet'][3]/(pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) == 0 %} -- {% else %} {{(pb['fold_cbet'][0]/(pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) == 0 %} -- {% else %} {{(pb['fold_cbet'][1]/(pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) == 0 %} -- {% else %} {{(pb['fold_cbet'][2]/(pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Postflop Aggression Factor (AF) - This is calculated by counting the number of hands in which you’ve either bet or raised post-flop, then dividing this by the number of hands in which you’ve called post-flop.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Flop Aggression</h5>
+			<h3 class="mt-3 mb-3" style="text-align:center;">{% if pb['post_hands_call'][3] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][3]/pb['post_hands_call'][3] )|round(1)}} {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if pb['post_hands_call'][0] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][0]/pb['post_hands_call'][0])|round(1)}} {% endif %} |
+					SR: {% if pb['post_hands_call'][1] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][1]/pb['post_hands_call'][1])|round(1)}} {% endif %} |
+					FT: {% if pb['post_hands_call'][2] == 0 %} -- {% else %} {{(pb['post_hands_bet_raise'][2]/pb['post_hands_call'][2])|round(1)}} {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Folded to Double Barrel (F2B) - This indicates how you often you fold when you are facing a double barrel on the turn.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Fold to 2B (F2B)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_2b'][3]+pb['call_raise_2b'][3]) == 0 %} -- {% else %} {{(pb['fold_2b'][3]/(pb['fold_2b'][3]+pb['call_raise_2b'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['fold_2b'][0]+pb['call_raise_2b'][0]) == 0 %} -- {% else %} {{(pb['fold_2b'][0]/(pb['fold_2b'][0]+pb['call_raise_2b'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['fold_2b'][1]+pb['call_raise_2b'][1]) == 0 %} -- {% else %} {{(pb['fold_2b'][1]/(pb['fold_2b'][1]+pb['call_raise_2b'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['fold_2b'][2]+pb['call_raise_2b'][2]) == 0 %} -- {% else %} {{(pb['fold_2b'][2]/(pb['fold_2b'][2]+pb['call_raise_2b'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Continuation Bet (CBET) - A continuation bet is when you were the last to raise preflop, and hence the aggressor, and you continued that aggression on the flop by being the first to bet.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">C-bet</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['cbet'][3]+pb['cbet_check_fold'][3]) == 0 %} -- {% else %} {{(pb['cbet'][3]/(pb['cbet'][3]+pb['cbet_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['cbet'][0]+pb['cbet_check_fold'][0]) == 0 %} -- {% else %} {{(pb['cbet'][0]/(pb['cbet'][0]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['cbet'][1]+pb['cbet_check_fold'][1]) == 0 %} -- {% else %} {{(pb['cbet'][1]/(pb['cbet'][1]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['cbet'][2]+pb['cbet_check_fold'][2]) == 0 %} -- {% else %} {{(pb['cbet'][2]/(pb['cbet'][2]+pb['cbet_check_fold'][3]) * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Folded to Double Barrel (F3Ba) - This indicates how you often you fold when you are facing a triple barrel on the river.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Fold to 3Ba (F3Ba)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3b'][3]+pb['call_raise_3b'][3]) == 0 %} -- {% else %} {{(pb['fold_3b'][3]/(pb['fold_3b'][3]+pb['call_raise_3b'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['fold_3b'][0]+pb['call_raise_3b'][0]) == 0 %} -- {% else %} {{(pb['fold_3b'][0]/(pb['fold_3b'][0]+pb['call_raise_3b'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['fold_3b'][1]+pb['call_raise_3b'][1]) == 0 %} -- {% else %} {{(pb['fold_3b'][1]/(pb['fold_3b'][1]+pb['call_raise_3b'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['fold_3b'][2]+pb['call_raise_3b'][2]) == 0 %} -- {% else %} {{(pb['fold_3b'][2]/(pb['fold_3b'][2]+pb['call_raise_3b'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Double Barrel (2B) - The number of turns you continued the aggression after continuation betting.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Double Barrel (2B)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['2barrel'][3]+pb['2barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['2barrel'][3]/(pb['2barrel'][3]+pb['2barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['2barrel'][0]+pb['2barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['2barrel'][0]/(pb['2barrel'][0]+pb['2barrel_check_fold'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['2barrel'][1]+pb['2barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['2barrel'][1]/(pb['2barrel'][1]+pb['2barrel_check_fold'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['2barrel'][2]+pb['2barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['2barrel'][2]/(pb['2barrel'][2]+pb['2barrel_check_fold'][2]) * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Folded to Three-Bet Preflop (F3B) - This measures how often you folded to another player’s three-bet pre-flop, when you have the opportunity to do so.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Fold to 3 Bet (F3B)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) == 0 %} -- {% else %} {{(pb['fold_3bet'][3]/(pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) == 0 %} -- {% else %} {{(pb['fold_3bet'][0]/(pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) == 0 %} -- {% else %} {{(pb['fold_3bet'][1]/(pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['fold_3bet'][2]+pb['call_raise_3bet'][2]) == 0 %} -- {% else %} {{(pb['fold_3bet'][2]/(pb['fold_3bet'][2]+pb['call_raise_3bet'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Triple Barrel (3Ba) - The number of rivers you continued the aggression after double barreling.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Triple Barrel (3Ba)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3barrel'][3]+pb['3barrel_check_fold'][3]) == 0 %} -- {% else %} {{(pb['3barrel'][3]/(pb['3barrel'][3]+pb['3barrel_check_fold'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['3barrel'][0]+pb['3barrel_check_fold'][0]) == 0 %} -- {% else %} {{(pb['3barrel'][0]/(pb['3barrel'][0]+pb['3barrel_check_fold'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['3barrel'][1]+pb['3barrel_check_fold'][1]) == 0 %} -- {% else %} {{(pb['3barrel'][1]/(pb['3barrel'][1]+pb['3barrel_check_fold'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['3barrel'][2]+pb['3barrel_check_fold'][2]) == 0 %} -- {% else %} {{(pb['3barrel'][2]/(pb['3barrel'][2]+pb['3barrel_check_fold'][2]) * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			<div class="col-sm-3 col-xl-3 col-lg-3">
-				<div class="card">
-					<div class="card-body">
-						<a href="#" class="text-muted float-end"
-								data-bs-toggle="tooltip" data-bs-placement="top"
-								data-bs-custom-class="custom-tooltip"
-								data-bs-title="Went to Showdown (WTSD) - Percent of hands seen where you make it to showdown.">
-							<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
-					<h5 class="card-title text-muted">Showdown % (WTSD)</h5>
-						<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['post_hands_played'][3]) == 0 %} -- {% else %} {{(pb['wtsd'][3]/(pb['post_hands_played'][3]) * 100)|round(2)}}% {% endif %}</h3>
-						<div class="text-muted sub-card">
-							HU: {% if (pb['post_hands_played'][0]) == 0 %} -- {% else %} {{(pb['wtsd'][0]/(pb['post_hands_played'][0]) * 100)|round()|int}}% {% endif %} |
-							SR: {% if (pb['post_hands_played'][1]) == 0 %} -- {% else %} {{(pb['wtsd'][1]/(pb['post_hands_played'][1]) * 100)|round()|int}}% {% endif %} |
-							FT: {% if (pb['post_hands_played'][2]) == 0 %} -- {% else %} {{(pb['wtsd'][2]/(pb['post_hands_played'][2]) * 100)|round()|int}}% {% endif %}
-						</div>
-					</div>
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Three-bet Pre-flop (3B) - This is a measure of how often you three-bet pre-flop. In pre-flop betting, to three-bet is to raise after exactly one other player has raised.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">3 Bet Preflop (3B)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['3bet'][3]+pb['no_3bet'][3]) == 0 %} -- {% else %} {{(pb['3bet'][3]/(pb['3bet'][3]+pb['no_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['3bet'][0]+pb['no_3bet'][0]) == 0 %} -- {% else %} {{(pb['3bet'][0]/(pb['3bet'][0]+pb['no_3bet'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['3bet'][1]+pb['no_3bet'][1]) == 0 %} -- {% else %} {{(pb['3bet'][1]/(pb['3bet'][1]+pb['no_3bet'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['3bet'][2]+pb['no_3bet'][2]) == 0 %} -- {% else %} {{(pb['3bet'][2]/(pb['3bet'][2]+pb['no_3bet'][2]) * 100)|round()|int}}% {% endif %}
 				</div>
 			</div>
+		</div>
+	</div>
 
-			
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Four-bet Preflop (4B) - This is a measure of how often you four-bet pre-flop. Four-betting is similar to three- betting, except that you are re-raising after a player has already re-raised.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">4 Bet Preflop (4B)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['4bet'][3]+pb['no_4bet'][3]) == 0 %} -- {% else %} {{(pb['4bet'][3]/(pb['4bet'][3]+pb['no_4bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['4bet'][0]+pb['no_4bet'][0]) == 0 %} -- {% else %} {{(pb['4bet'][0]/(pb['4bet'][0]+pb['no_4bet'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['4bet'][1]+pb['no_4bet'][1]) == 0 %} -- {% else %} {{(pb['4bet'][1]/(pb['4bet'][1]+pb['no_4bet'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['4bet'][2]+pb['no_4bet'][2]) == 0 %} -- {% else %} {{(pb['4bet'][2]/(pb['4bet'][2]+pb['no_4bet'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
 
-		</div> <!-- end row -->
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Folded to Continuation Bet (FC) - This indicates how you often you fold when you are facing a continuation bet on the flop.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Fold to Cbet (FC)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) == 0 %} -- {% else %} {{(pb['fold_cbet'][3]/(pb['fold_cbet'][3]+pb['call_raise_cbet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) == 0 %} -- {% else %} {{(pb['fold_cbet'][0]/(pb['fold_cbet'][0]+pb['call_raise_cbet'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) == 0 %} -- {% else %} {{(pb['fold_cbet'][1]/(pb['fold_cbet'][1]+pb['call_raise_cbet'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) == 0 %} -- {% else %} {{(pb['fold_cbet'][2]/(pb['fold_cbet'][2]+pb['call_raise_cbet'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
 
-	</div> <!-- end col -->
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Folded to Double Barrel (F2B) - This indicates how you often you fold when you are facing a double barrel on the turn.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Fold to 2B (F2B)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_2b'][3]+pb['call_raise_2b'][3]) == 0 %} -- {% else %} {{(pb['fold_2b'][3]/(pb['fold_2b'][3]+pb['call_raise_2b'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['fold_2b'][0]+pb['call_raise_2b'][0]) == 0 %} -- {% else %} {{(pb['fold_2b'][0]/(pb['fold_2b'][0]+pb['call_raise_2b'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['fold_2b'][1]+pb['call_raise_2b'][1]) == 0 %} -- {% else %} {{(pb['fold_2b'][1]/(pb['fold_2b'][1]+pb['call_raise_2b'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['fold_2b'][2]+pb['call_raise_2b'][2]) == 0 %} -- {% else %} {{(pb['fold_2b'][2]/(pb['fold_2b'][2]+pb['call_raise_2b'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Folded to Double Barrel (F3Ba) - This indicates how you often you fold when you are facing a triple barrel on the river.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Fold to 3Ba (F3Ba)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3b'][3]+pb['call_raise_3b'][3]) == 0 %} -- {% else %} {{(pb['fold_3b'][3]/(pb['fold_3b'][3]+pb['call_raise_3b'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['fold_3b'][0]+pb['call_raise_3b'][0]) == 0 %} -- {% else %} {{(pb['fold_3b'][0]/(pb['fold_3b'][0]+pb['call_raise_3b'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['fold_3b'][1]+pb['call_raise_3b'][1]) == 0 %} -- {% else %} {{(pb['fold_3b'][1]/(pb['fold_3b'][1]+pb['call_raise_3b'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['fold_3b'][2]+pb['call_raise_3b'][2]) == 0 %} -- {% else %} {{(pb['fold_3b'][2]/(pb['fold_3b'][2]+pb['call_raise_3b'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Folded to Three-Bet Preflop (F3B) - This measures how often you folded to another player’s three-bet pre-flop, when you have the opportunity to do so.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Fold to 3 Bet (F3B)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) == 0 %} -- {% else %} {{(pb['fold_3bet'][3]/(pb['fold_3bet'][3]+pb['call_raise_3bet'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) == 0 %} -- {% else %} {{(pb['fold_3bet'][0]/(pb['fold_3bet'][0]+pb['call_raise_3bet'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) == 0 %} -- {% else %} {{(pb['fold_3bet'][1]/(pb['fold_3bet'][1]+pb['call_raise_3bet'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['fold_3bet'][2]+pb['call_raise_3bet'][2]) == 0 %} -- {% else %} {{(pb['fold_3bet'][2]/(pb['fold_3bet'][2]+pb['call_raise_3bet'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-sm-3 col-xl-3 col-lg-3">
+		<div class="card">
+			<div class="card-body">
+				<a href="#" class="text-muted float-end"
+						data-bs-toggle="tooltip" data-bs-placement="top"
+						data-bs-custom-class="custom-tooltip"
+						data-bs-title="Went to Showdown (WTSD) - Percent of hands seen where you make it to showdown.">
+					<b><i class="fa fa-question-circle" aria-hidden="true"></i></b></a>
+			<h5 class="card-title text-muted">Showdown % (WTSD)</h5>
+				<h3 class="mt-3 mb-3" style="text-align:center;">{% if (pb['post_hands_played'][3]) == 0 %} -- {% else %} {{(pb['wtsd'][3]/(pb['post_hands_played'][3]) * 100)|round(2)}}% {% endif %}</h3>
+				<div class="text-muted sub-card">
+					HU: {% if (pb['post_hands_played'][0]) == 0 %} -- {% else %} {{(pb['wtsd'][0]/(pb['post_hands_played'][0]) * 100)|round()|int}}% {% endif %} |
+					SR: {% if (pb['post_hands_played'][1]) == 0 %} -- {% else %} {{(pb['wtsd'][1]/(pb['post_hands_played'][1]) * 100)|round()|int}}% {% endif %} |
+					FT: {% if (pb['post_hands_played'][2]) == 0 %} -- {% else %} {{(pb['wtsd'][2]/(pb['post_hands_played'][2]) * 100)|round()|int}}% {% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -510,7 +377,7 @@
 </style>
 <br/>
 <div class="container">
-	<canvas id="bankrollChart" height="250" width="600"></canvas>
+	<canvas id="bankrollChart" height="450" width="600"></canvas>
 
 </div>
 <br/>
@@ -690,6 +557,8 @@
 			]
 			},
 			options: {
+				responsive: true,
+				maintainAspectRatio: false,
 				plugins: {
 					//decimation: true,
 					legend:{
