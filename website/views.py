@@ -9,6 +9,8 @@ from io import StringIO
 from functools import wraps
 import boto3
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 s3 = boto3.client('s3',
