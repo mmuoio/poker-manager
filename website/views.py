@@ -359,8 +359,8 @@ def link_players():
 			playerIndex = findPlayerIndexByKey(PNDictionary, 'pn_player_id', row['player_id'])
 			if playerIndex >= 0:
 				#player ID exists, add to it
-				PNDictionary[playerIndex]['net'] += int(row['net'])
-				PNDictionary[playerIndex]['balance'] += int(row['net'])
+				PNDictionary[playerIndex]['net'] += float(row['net'])
+				PNDictionary[playerIndex]['balance'] += float(row['net'])
 				if row['player_nickname'] not in PNDictionary[playerIndex]['player_nickname']:
 					PNDictionary[playerIndex]['player_nickname'].append(row['player_nickname'])
 			else:
@@ -1469,9 +1469,9 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 			playerIndex = findPlayerIndexByKeyLog(PNDictionary, 'pn_player_id', row['player_id'])
 			if playerIndex >= 0:
 				#player ID exists, add to it
-				PNDictionary[playerIndex]['net'] += int(row['net'])
-				PNDictionary[playerIndex]['buy_in'] += int(row['buy_in'])
-				PNDictionary[playerIndex]['cash_out'] += int(row['buy_in']) + int(row['net'])
+				PNDictionary[playerIndex]['net'] += float(row['net'])
+				PNDictionary[playerIndex]['buy_in'] += float(row['buy_in'])
+				PNDictionary[playerIndex]['cash_out'] += float(row['buy_in']) + float(row['net'])
 				if row['player_nickname'] not in PNDictionary[playerIndex]['player_nickname']:
 					PNDictionary[playerIndex]['player_nickname'].append(row['player_nickname'])
 			else:

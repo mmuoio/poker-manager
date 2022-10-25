@@ -1,3 +1,4 @@
+flask run (hit play on app.py)
 
 flask db migrate -m 'test migration'
 flask db upgrade

@@ -1,127 +1,225 @@
-{% extends "base.html" %}
-{% block title %}Settlement{% endblock %}
-
-{% block content %}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css"/>
+{% extends "base.html" %} {% block title %}Settlement{% endblock %} {% block
+content %}
+<link
+	rel="stylesheet"
+	href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css"
+/>
 <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 
 <h1 align="center">Settlement</h1>
-<div align="center"><b>Date:</b> {{ game.date.strftime("%m/%d/%Y") }} | 
-	<b>Players:</b> {{earnings|length}} | 
-	{% if game.buyins %}<b>Total buy-ins:</b> {{ "${:,}".format(game.buyins) }} | {% endif %}
-	<b>Total payouts:</b> {{ "${:,}".format(total_payouts) }}
+<div align="center">
+	<b>Date:</b> {{ game.date.strftime("%m/%d/%Y") }} |
+	<b>Players:</b> {{earnings|length}} | {% if game.buyins %}<b
+		>Total buy-ins:</b
+	>
+	{{ "${:,}".format(game.buyins) }} | {% endif %} <b>Total payouts:</b> {{
+	"${:,}".format(total_payouts) }}
 </div>
-<hr/>
+<hr />
 <!--<a type="button" class="btn btn-primary float-end" href="/export_settlement?game_id={{game.id}}">Export CSV</a>
 		<br/><br/>-->
 <div class="row">
 	{% if earnings %}
 	<div class="col-md-5 col-sm-12">
-		<table class="table table-striped table-hover table-bordered" id="netTable">
+		<table
+			class="table table-striped table-hover table-bordered"
+			id="netTable"
+		>
 			<thead>
 				<tr>
-					<th colspan="2" style="text-align: center;">OVERALL WINNINGS</th>
+					<th colspan="2" style="text-align: center">
+						OVERALL WINNINGS
+					</th>
 				</tr>
 				<tr>
-					<th scope="col" style="text-align:center">PLAYER</th>
-					<th scope="col" style="text-align:center">NET</th>
+					<th scope="col" style="text-align: center">PLAYER</th>
+					<th scope="col" style="text-align: center">NET</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for earning in earnings %}
-			<tr class="netRow" data-id="{{earning.player_id}}">
-				<td>{% for player in players %}
-						{% if player['id'] == earning.player_id %}
-						{{ player.name }}
-						{% endif %}
-					{% endfor %}
+				<tr class="netRow" data-id="{{earning.player_id}}">
+					<td>
+						{% for player in players %} {% if player['id'] ==
+						earning.player_id %} {{ player.name }} {% endif %} {%
+						endfor %}
 					</td>
 
-				<td align="center">{{ earning.formatted_net }}</td>
-			</tr>
-			{% endfor %}
+					<td align="center">{{ earning.formatted_net }}</td>
+				</tr>
+				{% endfor %}
 			</tbody>
 		</table>
 	</div>
 	<div class="col-md-7 col-sm-12">
-	{% else %}
-	<div class="col-12">
-	{% endif %}
+		{% else %}
+		<div class="col-12">
+			{% endif %}
 
-		
-		<table class="table table-striped table-hover table-bordered" id="payoutTable">
-			<thead>
-				<tr>
-					<th colspan="3" style="text-align: center;">PAYMENTS</th>
-				</tr>
-			<tr>
-				<th scope="col" style="text-align:center" width="40%">FROM</th>
-				<th scope="col" style="text-align:center" width="40%">TO</th>
-				<th scope="col" style="text-align:center" width="20%">AMOUNT</th>
-			</tr>
-			</thead>
-			<tbody>
-				{% for payment in payments %}
-			<tr class="payoutRow" data-payer="{{payment.payer}}" data-payee="{{payment.payee}}">
-				<td>{% for player in players %}
-						{% if player['id'] == payment.payer %}
-						<a href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}" target="_blank"><img src="/static/venmo2.png" style="height: 20px"/></a> {{ player.name }}
-						{% endif %}
+			<table
+				class="table table-striped table-hover table-bordered"
+				id="payoutTable"
+			>
+				<thead>
+					<tr>
+						<th colspan="3" style="text-align: center">PAYMENTS</th>
+					</tr>
+					<tr>
+						<th scope="col" style="text-align: center" width="40%">
+							FROM
+						</th>
+						<th scope="col" style="text-align: center" width="40%">
+							TO
+						</th>
+						<th scope="col" style="text-align: center" width="20%">
+							AMOUNT
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for payment in payments %}
+					<tr
+						class="payoutRow"
+						data-payer="{{payment.payer}}"
+						data-payee="{{payment.payee}}"
+					>
+						<td>
+							{% for player in players %} {% if player['id'] ==
+							payment.payer %}
+							<a
+								href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}"
+								target="_blank"
+								><img
+									src="/static/venmo2.png"
+									style="height: 20px"
+							/></a>
+							{{ player.name }} {% endif %} {% endfor %}
+						</td>
+						<td>
+							{% for player in players %} {% if player['id'] ==
+							payment.payee %}
+							<a
+								href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}"
+								target="_blank"
+								><img
+									src="/static/venmo2.png"
+									style="height: 20px"
+							/></a>
+							{{ player.name }} {% endif %} {% endfor %}
+						</td>
+						<td align="center">
+							{{ "${:,}".format(payment.amount) }}
+						</td>
+					</tr>
 					{% endfor %}
-					</td>
-					<td>{% for player in players %}
-						{% if player['id'] == payment.payee %}
-						<a href="https://account.venmo.com/u/{{player.venmo.replace('@','')}}" target="_blank"><img src="/static/venmo2.png" style="height: 20px"/></a> {{ player.name }}
-						{% endif %}
-					{% endfor %}</td>
-				<td align="center">{{ "${:,}".format(payment.amount) }}</td>
-			</tr>
-			{% endfor %}
-			</tbody>
-		</table>
+				</tbody>
+			</table>
+		</div>
 	</div>
-</div>
 
-  <script type="text/javascript">
-	$(document).ready(function () {
-		/*$('#payoutTable').DataTable({
+	<script type="text/javascript">
+		$(document).ready(function () {
+			/*$('#payoutTable').DataTable({
 			paging: false
 		});*/
 
-		$('#netTable .netRow').hover(function(){
-			if($('#netTable .netRow.net-active').length==0){
-				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').addClass('settlement-dark');
-				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').addClass('settlement-payment');
-				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').addClass('settlement-receive');
-			}
-		}, function(){
-			if($('#netTable .netRow.net-active')){
-				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').removeClass('settlement-dark');
-				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').removeClass('settlement-payment');
-				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').removeClass('settlement-receive');
-			}
-		});
-		
-		$('#netTable .netRow').on('click', function(){
-			if(!$(this).hasClass('net-active')){
-				$('#netTable .netRow.net-active').removeClass('net-active');
-				$('.payoutRow').removeClass('settlement-dark-active');
-				$('#payoutTable .payoutRow').removeClass('settlement-payment-active');
-				$('#payoutTable .payoutRow').removeClass('settlement-receive-active');
-				
-				$(this).addClass('net-active');
-				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').addClass('settlement-dark-active');
-				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').addClass('settlement-payment-active');
-				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').addClass('settlement-receive-active');
-				
-			}else{
-				$(this).removeClass('net-active');
-				$('.payoutRow:not([data-payer="'+$(this).data('id')+'"]):not([data-payee="'+$(this).data('id')+'"])').removeClass('settlement-dark-active');
-				$('#payoutTable .payoutRow[data-payer="'+$(this).data('id')+'"]').removeClass('settlement-payment-active');
-				$('#payoutTable .payoutRow[data-payee="'+$(this).data('id')+'"]').removeClass('settlement-receive-active');
-			}
-		});
-	});
-  </script>
+			$("#netTable .netRow").hover(
+				function () {
+					if ($("#netTable .netRow.net-active").length == 0) {
+						$(
+							'.payoutRow:not([data-payer="' +
+								$(this).data("id") +
+								'"]):not([data-payee="' +
+								$(this).data("id") +
+								'"])'
+						).addClass("settlement-dark");
+						$(
+							'#payoutTable .payoutRow[data-payer="' +
+								$(this).data("id") +
+								'"]'
+						).addClass("settlement-payment");
+						$(
+							'#payoutTable .payoutRow[data-payee="' +
+								$(this).data("id") +
+								'"]'
+						).addClass("settlement-receive");
+					}
+				},
+				function () {
+					if ($("#netTable .netRow.net-active")) {
+						$(
+							'.payoutRow:not([data-payer="' +
+								$(this).data("id") +
+								'"]):not([data-payee="' +
+								$(this).data("id") +
+								'"])'
+						).removeClass("settlement-dark");
+						$(
+							'#payoutTable .payoutRow[data-payer="' +
+								$(this).data("id") +
+								'"]'
+						).removeClass("settlement-payment");
+						$(
+							'#payoutTable .payoutRow[data-payee="' +
+								$(this).data("id") +
+								'"]'
+						).removeClass("settlement-receive");
+					}
+				}
+			);
 
-{% endblock %}
+			$("#netTable .netRow").on("click", function () {
+				if (!$(this).hasClass("net-active")) {
+					$("#netTable .netRow.net-active").removeClass("net-active");
+					$(".payoutRow").removeClass("settlement-dark-active");
+					$("#payoutTable .payoutRow").removeClass(
+						"settlement-payment-active"
+					);
+					$("#payoutTable .payoutRow").removeClass(
+						"settlement-receive-active"
+					);
+
+					$(this).addClass("net-active");
+					$(
+						'.payoutRow:not([data-payer="' +
+							$(this).data("id") +
+							'"]):not([data-payee="' +
+							$(this).data("id") +
+							'"])'
+					).addClass("settlement-dark-active");
+					$(
+						'#payoutTable .payoutRow[data-payer="' +
+							$(this).data("id") +
+							'"]'
+					).addClass("settlement-payment-active");
+					$(
+						'#payoutTable .payoutRow[data-payee="' +
+							$(this).data("id") +
+							'"]'
+					).addClass("settlement-receive-active");
+				} else {
+					$(this).removeClass("net-active");
+					$(
+						'.payoutRow:not([data-payer="' +
+							$(this).data("id") +
+							'"]):not([data-payee="' +
+							$(this).data("id") +
+							'"])'
+					).removeClass("settlement-dark-active");
+					$(
+						'#payoutTable .payoutRow[data-payer="' +
+							$(this).data("id") +
+							'"]'
+					).removeClass("settlement-payment-active");
+					$(
+						'#payoutTable .payoutRow[data-payee="' +
+							$(this).data("id") +
+							'"]'
+					).removeClass("settlement-receive-active");
+				}
+			});
+		});
+	</script>
+
+	{% endblock %}
+</div>
