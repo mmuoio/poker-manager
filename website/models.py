@@ -56,19 +56,19 @@ class Url(db.Model):
 	imported = db.Column(db.Boolean, default=False)
 	behaviors = db.relationship('Behavior', backref='url')
 	game_type = db.Column(db.String(20))
-	small_blind = db.Column(db.Integer)
-	big_blind = db.Column(db.Integer)
+	small_blind = db.Column(db.Numeric)
+	big_blind = db.Column(db.Numeric)
 
 class Payment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	amount = db.Column(db.Integer)
+	amount = db.Column(db.Numeric)
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 	payer = db.Column(db.Integer, db.ForeignKey('player.id'))
 	payee = db.Column(db.Integer, db.ForeignKey('player.id'))
 
 class Earning(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	net = db.Column(db.Integer)
+	net = db.Column(db.Numeric)
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 
@@ -186,8 +186,8 @@ class Bankroll(db.Model):
 	imported = db.Column(db.Boolean, default=False)
 	date = db.Column(db.DateTime(timezone=True), default=func.now())
 	location = db.Column(db.String(200), default='PokerNow')
-	buyin = db.Column(db.Integer)
-	cashout = db.Column(db.Integer)
-	net = db.Column(db.Integer)
+	buyin = db.Column(db.Numeric)
+	cashout = db.Column(db.Numeric)
+	net = db.Column(db.Numeric)
 	duration = db.Column(db.Integer)
 	hands_played = db.Column(db.Integer)

@@ -649,7 +649,7 @@ def import_log():
 
 				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
 				parsedLog = parse_log(ledger_url_s3)
-				
+				print(parsedLog)
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
 				#for each in behavior:
 				#	print(each)
@@ -1745,11 +1745,16 @@ def player_stats():
 			
 			for bankroll in bankrolls:
 				if bankroll.behavior:
+					bankroll.net = float(bankroll.net)
+					bankroll.duration = float(bankroll.duration)
+					bankroll.buyin = float(bankroll.buyin)
+					bankroll.cashout = float(bankroll.cashout)
 					for each_behavior in player_behavior.keys():
 						#print(each_behavior)
 						x = eval('bankroll.behavior.hu_'+each_behavior)
 						y = eval('bankroll.behavior.sr_'+each_behavior)
 						z = eval('bankroll.behavior.ft_'+each_behavior)
+
 						player_behavior[each_behavior][0] += x
 						player_behavior[each_behavior][1] += y
 						player_behavior[each_behavior][2] += z

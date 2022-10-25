@@ -48,7 +48,7 @@
 		<div class="card">
 			<div class="card-body">
 			<h5 class="card-title text-muted">Bankroll</h5>
-			<h3 class="mt-3 mb-3 {% if bankrolls | sum(attribute="net") > 0 %}text-success{% else %}text-danger {% endif %}" style="text-align:center;">${{ "{:,}".format(bankrolls | sum(attribute="net"))}}</h3>
+			<h3 class="mt-3 mb-3 {% if bankrolls | sum(attribute="net") > 0 %}text-success{% else %}text-danger {% endif %}" style="text-align:center;">${{ "{:,}".format((bankrolls | sum(attribute="net")) | round(2))}}</h3>
 			<div class="text-muted sub-card">
 				ROI: {{ "{:,.2f}".format((bankrolls | sum(attribute="net") /  (bankrolls | sum(attribute="buyin")) * 100) | round(2))}}%
 			</div>
