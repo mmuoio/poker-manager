@@ -189,5 +189,5 @@ class Bankroll(db.Model):
 	buyin = db.Column(db.Numeric)
 	cashout = db.Column(db.Numeric)
 	net = db.Column(db.Numeric)
-	duration = db.Column(db.Integer)
+	duration = db.Column(db.Numeric)
 	hands_played = db.Column(db.Integer)

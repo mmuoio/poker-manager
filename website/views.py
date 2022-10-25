@@ -1703,7 +1703,6 @@ def player_stats():
 			plo = True
 			plo8 = True
 			game_type_filter = ['NLHE', 'PLO', 'PLO8']
-		
 		if player:
 			#get behavior stats
 			#bankrolls = Bankroll.query.order_by(Bankroll.date.desc()).filter_by(player_id=player.id).all()
@@ -1745,10 +1744,7 @@ def player_stats():
 			
 			for bankroll in bankrolls:
 				if bankroll.behavior:
-					bankroll.net = float(bankroll.net)
-					bankroll.duration = float(bankroll.duration)
-					bankroll.buyin = float(bankroll.buyin)
-					bankroll.cashout = float(bankroll.cashout)
+					print('net', bankroll.net, float(bankroll.net))
 					for each_behavior in player_behavior.keys():
 						#print(each_behavior)
 						x = eval('bankroll.behavior.hu_'+each_behavior)
@@ -1760,6 +1756,7 @@ def player_stats():
 						player_behavior[each_behavior][2] += z
 						player_behavior[each_behavior][3] += x+y+z
 
+			print('test')
 			#print(player_behavior)
 			bankrollChartX = []
 			bankrollChartY = []
@@ -1769,11 +1766,12 @@ def player_stats():
 					winslosses[0] += 1
 				elif bankroll.net < 0:
 					winslosses[1] += 1
-			bankrollNet = 0
+			bankrollNet = float(0)
+			print(bankrolls)
 			bankroll_reverse = bankrolls.copy()
 			bankroll_reverse.reverse()
 			for bankroll in bankroll_reverse:
-				bankrollNet += bankroll.net
+				bankrollNet = float(bankrollNet) + float(bankroll.net)
 				bankrollChartY.append(bankrollNet)
 				bankrollChartX.append(bankroll.date.strftime('%b %d, %y'))
 			#print(round(pre_hands_participated[3]/pre_hands_played[3] * 100,2))
