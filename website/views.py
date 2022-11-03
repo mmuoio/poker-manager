@@ -516,6 +516,8 @@ def payout():
 	total_payouts = 0
 	if earnings:
 		for earning in earnings:
+			if earning.net % 1 == 0:
+				earning.net = int(earning.net)
 			if earning.net < 0:
 				net = '-' + str("${:,}".format(abs(earning.net)))
 				total_payouts += abs(earning.net)
@@ -523,7 +525,14 @@ def payout():
 				net = str("${:,}".format(earning.net))
 
 			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
-	return render_template("payout.html", user=current_user, payments=payments, players=players, game=game, earnings=new_earnings, total_payouts=total_payouts)
+	new_payments = []
+	if payments:
+		for payment in payments:
+			new_amount = payment.amount
+			if new_amount % 1 == 0:
+				new_amount = int(new_amount)
+			new_payments.append({'payer': payment.payer, 'payee' : payment.payee, 'amount' : new_amount})
+	return render_template("payout.html", user=current_user, payments=new_payments, players=players, game=game, earnings=new_earnings, total_payouts=total_payouts)
 
 
 @views.route('/games', methods=['GET','POST'])
