@@ -706,7 +706,7 @@ def parse_log(csv_file):
 	updateStackRegex = '^The admin updated the player "(.*) @ (.*)" stack from (\d+) to (\d+).'
 
 	# Hand regexes
-	beginHandRegex = "^-- starting hand #(\d*)  \(([a-zA-Z'0-9\/ ]*)\).*"
+	beginHandRegex = "^-- starting hand #(\d*)( \(id: [a-zA-Z'0-9\/ ]*\)|)  \(([a-zA-Z'0-9\/ ]*)\).*"
 	yourHandRegex = '^Your hand is (.*)'
 	blindRegex = '^"(.*) @ (.*)" posts a (?:\\bmissed\\b\s|\\bmissing\\b\s)?(\\bbig\\b|\\bsmall\\b) blind of (\d*(?:\.\d\d)?)'
 	straddleRegex = '^"(.*) @ (.*)" posts a straddle of (\d*(?:\.\d\d)?)'
