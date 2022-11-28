@@ -658,7 +658,7 @@ def import_log():
 
 				ledger_url_s3 = "https://pokermanager.s3.amazonaws.com/logs/poker_now_log_"+stripped_filename+".csv"
 				parsedLog = parse_log(ledger_url_s3)
-				print(parsedLog)
+				#print(parsedLog)
 				behavior = parseBehavior(parsedLog, game_id, stripped_filename)
 				#for each in behavior:
 				#	print(each)
@@ -822,14 +822,14 @@ def parse_log(csv_file):
 		# Hands
 		elif re.search(beginHandRegex, row['entry']):
 			handNumber += 1
-			game_search = re.findall(beginHandRegex, row['entry'])[0][1]
+			game_search = re.findall(beginHandRegex, row['entry'])[0][2]
 			if game_search == "No Limit Texas Hold'em":
 				gameType = 'NLHE'
 			elif game_search == "Pot Limit Omaha Hi":
 				gameType = 'PLO'
 			elif game_search == "Pot Limit Omaha Hi/Lo 8 or Better":
 				gameType = 'PLO8'
-			
+			print(gameType)
 
 			hands.append({
 				'handNumber': handNumber,
@@ -1675,7 +1675,6 @@ def parseBehavior(pokerGame, game_id, stripped_filename):
 	if pokerGame['gameType']: urls[which_url].game_type = pokerGame['gameType']
 	if pokerGame['bigBlind']: urls[which_url].big_blind = pokerGame['bigBlind']
 	if pokerGame['smallBlind']: urls[which_url].small_blind = pokerGame['smallBlind']
-
 	db.session.commit()
 
 	return allPlayerActions
