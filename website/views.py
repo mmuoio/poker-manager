@@ -146,7 +146,7 @@ def edit_player():
 	
 	if request.method == 'POST':
 		data = request.form
-		print(data)
+		#print(data)
 		if  "alias-submit" in request.form:
 			print('alias submit')
 			player_alias = data.get('player-alias')
@@ -217,7 +217,11 @@ def import_game():
 					return render_template("import_game.html", user=current_user)
 				else:
 					if not new_game:
-						new_game = Game(settled=False)
+						if data.get('use_cents') == 'on':
+							use_cents = 1
+						else:
+							use_cents = 0
+						new_game = Game(settled=False, decimal=use_cents)
 						db.session.add(new_game)
 						db.session.flush()
 					new_url = Url(url = game_url, game_id=new_game.id)
@@ -431,16 +435,21 @@ def link_players():
 	def settle(debts):
 		#Sort the ledger by balance
 		debtsDict = (sorted(debts, key = lambda i: i['balance']))
+		#print(debtsDict)
 		for debt in debtsDict:
 			if debt['balance'] < 0:
 				#if player still owes
+				#print(debt['player_nickname'][0]  + ' ' + str(debt['balance']))
+				#print(debt['player_nickname'][0] + ' owes ' +str( debt['balance']))
 				for i in range(len(debtsDict)):
 					if debt['pn_player_id'] != debtsDict[-i]['pn_player_id']:
+						#print('test2')
 						#print(debt['player_nickname'][0] + ' pays ' + debtsDict[-i]['player_nickname'][0] +' ' + str(debt['balance']))
 						#print(abs(debt['balance']), game.id, debt['player_id'], debtsDict[-i]['player_id'])
-						new_payment = Payment(amount=abs(debt['balance']), game_id=game.id, payer=debt['player_id'], payee=debtsDict[-i]['player_id'])
+						new_payment = Payment(amount=round(abs(float(debt['balance'])),2), game_id=game.id, payer=round(float(debt['player_id']),2), payee=debtsDict[-i]['player_id'])
 						db.session.add(new_payment)
-						debtsDict[-i]['balance'] = debtsDict[-i]['balance'] + debt['balance']
+						#print( round(float(debtsDict[-i]['balance']),2), round(float(debt['balance']),2))
+						debtsDict[-i]['balance'] = round(float(debtsDict[-i]['balance']),2) + round(float(debt['balance']),2)
 						debt['balance'] = 0
 						debts = debtsDict
 						return
@@ -450,9 +459,15 @@ def link_players():
 	#LOOP OVER THE DEBT DICT UNTIL ALL BALANCED
 	#####################################
 	debts = (sorted(finalLedger, key = lambda i: i['net']))
+
+	if game.decimal:
+		for debt in debts:
+			debt['net'] = debt['net']*.01
+			debt['balance'] = debt['balance']*.01
+
 	while balance_remaining(debts):
 		settle(debts)
-
+	
 	from datetime import datetime, timedelta
 	
 	#game_date = datetime.strptime(game_date, "%Y-%m-%dT%H:%M:%SZ")
@@ -468,7 +483,7 @@ def link_players():
 		#####################################
 		#ADD TO EARNINGS TABLE
 		#####################################
-		new_earning = Earning(net=debt['net'],player_id=debt['player_id'],game_id=game.id)
+		new_earning = Earning(net=round(float(debt['net']),2),player_id=debt['player_id'],game_id=game.id)
 		db.session.add(new_earning)
 
 		#####################################
@@ -829,7 +844,7 @@ def parse_log(csv_file):
 				gameType = 'PLO'
 			elif game_search == "Pot Limit Omaha Hi/Lo 8 or Better":
 				gameType = 'PLO8'
-			print(gameType)
+			#print(gameType)
 
 			hands.append({
 				'handNumber': handNumber,
@@ -1752,7 +1767,7 @@ def player_stats():
 			
 			for bankroll in bankrolls:
 				if bankroll.behavior:
-					print('net', bankroll.net, float(bankroll.net))
+					#print('net', bankroll.net, float(bankroll.net))
 					for each_behavior in player_behavior.keys():
 						#print(each_behavior)
 						x = eval('bankroll.behavior.hu_'+each_behavior)
@@ -1764,7 +1779,7 @@ def player_stats():
 						player_behavior[each_behavior][2] += z
 						player_behavior[each_behavior][3] += x+y+z
 
-			print('test')
+			
 			#print(player_behavior)
 			bankrollChartX = []
 			bankrollChartY = []
@@ -1775,7 +1790,7 @@ def player_stats():
 				elif bankroll.net < 0:
 					winslosses[1] += 1
 			bankrollNet = float(0)
-			print(bankrolls)
+			#print(bankrolls)
 			bankroll_reverse = bankrolls.copy()
 			bankroll_reverse.reverse()
 			for bankroll in bankroll_reverse:

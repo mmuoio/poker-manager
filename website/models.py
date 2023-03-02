@@ -48,6 +48,7 @@ class Game(db.Model):
 	earnings = db.relationship('Earning', backref='game')
 	buyins = db.Column(db.Integer)
 	behaviors = db.relationship('Behavior', backref='game')
+	decimal = db.Column(db.Boolean, default=False)
 
 class Url(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
