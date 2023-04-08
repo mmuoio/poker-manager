@@ -1,5 +1,6 @@
 #from asyncio.windows_events import NULL
 from flask import Blueprint, jsonify, render_template, request, flash, redirect, url_for, make_response, Response
+from flask_paginate import Pagination, get_page_parameter
 from flask_login import login_required, current_user, AnonymousUserMixin
 from sqlalchemy import null, func, asc, desc
 from .models import Bankroll, Player, Alias, Game, Payment, Url, Earning, PokernowId, Behavior
@@ -552,7 +553,18 @@ def payout():
 
 @views.route('/games', methods=['GET','POST'])
 def games():
+	search = False
+	q = request.args.get('q')
+	if q:
+		search = True
+	page = request.args.get(get_page_parameter(), type=int, default=1)
+	
 	games = Game.query.order_by(Game.date.desc()).all()
+	game_page = Game.query.order_by(Game.date.desc()).paginate(page=page, per_page=15)
+	print(game_page)
+
+	pagination = Pagination(page=page, total=len(games), search=search, record_name='games', per_page=15)
+
 	urls = {}
 	for game in games:
 		for url in game.urls:
@@ -563,7 +575,7 @@ def games():
 				urls[game.id] = url.imported
 			
 
-	return render_template("games.html", user=current_user, games=games, imported=urls)
+	return render_template("games.html", user=current_user, games=game_page.items, pagination=pagination, imported=urls)
 
 
 @views.route('/export_settlement', methods=['GET','POST'])

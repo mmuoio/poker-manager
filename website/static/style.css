@@ -1,65 +1,62 @@
-.body{
+.body {
 	height: 100%;
-	background-image: url('card_suits4.png');
+	background-image: url("card_suits4.png");
 }
 
-.body_container{
+.body_container {
 	border-radius: 20px;
 	padding: 10px 35px 35px 35px;
 }
 
-.settlement-dark{
-	opacity:40%
+.settlement-dark {
+	opacity: 40%;
 }
-.settlement-dark-active{
-	opacity:40%
+.settlement-dark-active {
+	opacity: 40%;
 }
-.settlement-payment,.settlement-payment-active{
+.settlement-payment,
+.settlement-payment-active {
 	background-color: rgb(208, 147, 147);
 	font-weight: bold;
 }
-.settlement-receive,.settlement-receive-active{
+.settlement-receive,
+.settlement-receive-active {
 	background-color: rgb(147, 200, 147);
 	font-weight: bold;
 }
-.net-active{
+.net-active {
 	background-color: rgb(147, 200, 147);
 	font-weight: bold;
 }
 
-.netRow{
+.netRow {
 	cursor: pointer;
 }
 
-.card{
-	margin: .5rem
+.card {
+	margin: 0.5rem;
 }
-.sub-card{
+.sub-card {
 	font-size: 10pt;
 	text-align: center;
 }
-.card-title{
+.card-title {
 	font-weight: normal;
 }
 
-.player_link_dropdown[data-chosen='-1']:not(:focus){
+.player_link_dropdown[data-chosen="-1"]:not(:focus) {
 	background-color: #3fa76c;
 	color: #fff;
 }
 
-.nav-link{
+.nav-link {
 	color: #fff;
 }
 
-.card-body h3{
-	margin-top:5px !important;
+.card-body h3 {
+	margin-top: 5px !important;
 	margin-bottom: 5px !important;
 }
-
-
-
-
-
 
 @media only screen and (max-width: 768px) {
 	/* Force table to not be like tables anymore */
@@ -69,45 +66,49 @@
 	#no-more-tables th,
 	#no-more-tables td,
 	#no-more-tables tr {
-	display: block;
+		display: block;
 	}
-	 
+
 	/* Hide table headers (but not display: none;, for accessibility) */
 	#no-more-tables thead tr {
-	position: absolute;
-	top: -9999px;
-	left: -9999px;
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
 	}
-	 
-	#no-more-tables tr { border: 1px solid #ccc; }
-	  
+
+	#no-more-tables tr {
+		border: 1px solid #ccc;
+	}
+
 	#no-more-tables td {
-	/* Behave like a "row" */
-	border: none;
-	border-bottom: 1px solid #eee;
-	position: relative;
-	--padding-left: 50%;
-	white-space: normal;
-	text-align:left;
-	overflow: wrap;
-	overflow-wrap: break-word;
+		/* Behave like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee;
+		position: relative;
+		--padding-left: 50%;
+		white-space: normal;
+		text-align: left;
+		overflow: wrap;
+		overflow-wrap: break-word;
 	}
-	 
+
 	#no-more-tables td:before {
-	/* Now like a table header */
-	position: absolute;
-	/* Top/left values mimic padding */
-	top: 6px;
-	left: 6px;
-	width: 45%;
-	padding-right: 10px;
-	white-space: nowrap;
-	text-align:left;
-	font-weight: bold;
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 45%;
+		padding-right: 10px;
+		white-space: nowrap;
+		text-align: left;
+		font-weight: bold;
 	}
-	 
+
 	/*
 	Label the data
 	*/
-	#no-more-tables td:before { content: attr(data-title); }
+	#no-more-tables td:before {
+		content: attr(data-title);
 	}
+}
