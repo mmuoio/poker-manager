@@ -1897,7 +1897,10 @@ def getPlayerByPnId(pn_id):
   player_lookup = db.session.query(Player).join(PokernowId).filter(PokernowId.pn_id == pn_id).first()
   if(player_lookup):
     return jsonify(
-  	  {'name' : player_lookup.name}
+  	  {'name' : player_lookup.name, 'uid': pn_id}
     )
   else:
-    return "Player not found", 400
+    from flask import abort, make_response
+    json = jsonify(message="User not found")
+    response = make_response(json, 400)
+    abort(response)
