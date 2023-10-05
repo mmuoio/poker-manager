@@ -1891,3 +1891,13 @@ def batch_import_logs():
 	my_bucket = s3_resource.Bucket(BUCKET_NAME)
 	summaries = my_bucket.objects.all()
 	return render_template('files.html', my_bucket=my_bucket, files=summaries, file_check=fileCheck)
+
+@views.route('/getPlayerByPnId/<pn_id>', methods=['GET'])
+def getPlayerByPnId(pn_id):
+  player_lookup = db.session.query(Player).join(PokernowId).filter(PokernowId.pn_id == pn_id).first()
+  if(player_lookup):
+    return jsonify(
+  	  {'name' : player_lookup.name}
+    )
+  else:
+    return "Player not found", 400
