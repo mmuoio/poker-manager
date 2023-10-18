@@ -1904,3 +1904,30 @@ def getPlayerByPnId(pn_id):
     json = jsonify(message="User not found")
     response = make_response(json, 400)
     abort(response)
+
+@views.route('/getPlayersByPnId', methods=['POST'])
+def getPlayersByPnId():
+	import json
+	data = json.loads(json.dumps(request.json))
+	pn_id_arr = data.get('pn_ids')
+	pn_id_return_obj = {'missing' : []}
+  
+	player_lookup = db.session.query(Player,PokernowId).join(PokernowId).filter(PokernowId.pn_id.in_(pn_id_arr)).all()
+
+	if player_lookup:
+		for player in player_lookup:
+			pn_id_return_obj[player.PokernowId.pn_id] = player.Player.name
+			pn_id_arr.remove(player.PokernowId.pn_id)
+	pn_id_return_obj["missing"] = pn_id_arr
+	return jsonify(pn_id_return_obj)
+  
+	player_lookup = db.session.query(Player).join(PokernowId).filter(PokernowId.pn_id == pn_id).first()
+	if(player_lookup):
+		return jsonify(
+			{'name' : player_lookup.name, 'uid': pn_id}
+		)
+	else:
+		from flask import abort, make_response
+		json = jsonify(message="User not found")
+		response = make_response(json, 400)
+		abort(response)
