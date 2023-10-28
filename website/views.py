@@ -1931,3 +1931,14 @@ def getPlayersByPnId():
 		json = jsonify(message="User not found")
 		response = make_response(json, 400)
 		abort(response)
+
+@views.route('/getAllPlayers', methods=['GET'])
+def getAllPlayers():
+	import json
+	data = json.loads(json.dumps(request.json))
+	player_return_obj = []
+	players = Player.query.order_by(Player.name.asc()).all()
+	for player in players:
+		player_return_obj.append(player.name)
+	print(player_return_obj)
+	return jsonify(player_return_obj)
