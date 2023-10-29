@@ -1919,7 +1919,9 @@ def getPlayersByPnId():
 			pn_id_return_obj[player.PokernowId.pn_id] = player.Player.name
 			pn_id_arr.remove(player.PokernowId.pn_id)
 	pn_id_return_obj["missing"] = pn_id_arr
-	return jsonify(pn_id_return_obj)
+	response = jsonify(pn_id_return_obj)
+	response.headers.add('Access-Control-Allow-Origin', '*')
+	return response
   
 	player_lookup = db.session.query(Player).join(PokernowId).filter(PokernowId.pn_id == pn_id).first()
 	if(player_lookup):
