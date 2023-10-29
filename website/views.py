@@ -1935,10 +1935,10 @@ def getPlayersByPnId():
 @views.route('/getAllPlayers', methods=['GET'])
 def getAllPlayers():
 	import json
-	data = json.loads(json.dumps(request.json))
 	player_return_obj = []
 	players = Player.query.order_by(Player.name.asc()).all()
 	for player in players:
 		player_return_obj.append(player.name)
-	print(player_return_obj)
-	return jsonify(player_return_obj)
+	response = jsonify(player_return_obj)
+	response.headers.add('Access-Control-Allow-Origin', '*')
+	return response
