@@ -484,7 +484,12 @@ def link_players():
 		#####################################
 		#ADD TO EARNINGS TABLE
 		#####################################
-		new_earning = Earning(net=round(float(debt['net']),2),player_id=debt['player_id'],game_id=game.id)
+		record_check = Earning.query.filter(Earning.net > round(float(debt['net']),2), Earning.net > 0, Earning.player_id==debt['player_id']).count()
+		new_record = 0
+		if record_check == 0 and round(float(debt['net']),2) > 0:
+			new_record = 1
+
+		new_earning = Earning(net=round(float(debt['net']),2),player_id=debt['player_id'],game_id=game.id, new_record = new_record)
 		db.session.add(new_earning)
 
 		#####################################
@@ -540,7 +545,7 @@ def payout():
 			else:
 				net = str("${:,}".format(earning.net))
 
-			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id})
+			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id, 'new_record' : earning.new_record})
 	new_payments = []
 	if payments:
 		for payment in payments:

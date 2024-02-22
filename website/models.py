@@ -72,6 +72,7 @@ class Earning(db.Model):
 	net = db.Column(db.Numeric)
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 	player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+	new_record = db.Column(db.Boolean, default=False)
 
 class Behavior(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
