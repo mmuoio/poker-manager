@@ -4,8 +4,9 @@
 
 <h1 align="center">Settlement</h1>
 <div align="center">
-	<b>Date:</b> {{ game.date.strftime("%m/%d/%Y") }} | <b>Players:</b> {{earnings|length}} | {% if game.buyins %}<b>Total buy-ins:</b> {{
-	"${:,}".format(game.buyins) }} | {% endif %} <b>Total payouts:</b> {{ "${:,}".format(total_payouts) }}
+	<b>Date:</b> {{ game.date.strftime("%m/%d/%Y") }} | <b>Players:</b> {{earnings|length}} | {% if game.buyins %}<b>Total buy-ins:</b> {% if
+	game.decimal %}{{ "${:,.2f}".format(total_buyins) }} {% else %} {{ "${:,}".format(total_buyins) }} {% endif %} | {% endif %}
+	<b>Total payouts:</b> {{ "${:,}".format(total_payouts) }}
 </div>
 <hr />
 <!--<a type="button" class="btn btn-primary float-end" href="/export_settlement?game_id={{game.id}}">Export CSV</a>

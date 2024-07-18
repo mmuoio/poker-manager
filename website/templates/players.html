@@ -30,7 +30,7 @@
 				{% if user and user.is_authenticated and user.admin %}
 				<td align="center">
 					{% if player.earnings | sum(attribute='net') != 0 %}
-					{{ player.earnings | sum(attribute='net') }}
+					{{ "{:,.2f}".format(player.earnings | sum(attribute='net')) }}
 					{% endif %}
 				</td>
 				{% endif %}

@@ -535,15 +535,24 @@ def payout():
 
 	new_earnings = []
 	total_payouts = 0
+	total_buyins=game.buyins
+	if game.decimal:
+		total_buyins=total_buyins*.01
 	if earnings:
 		for earning in earnings:
 			if earning.net % 1 == 0:
 				earning.net = int(earning.net)
 			if earning.net < 0:
-				net = '-' + str("${:,}".format(abs(earning.net)))
+				if game.decimal:
+					net = '-' + str("${:,.2f}".format(abs(earning.net)))
+				else:
+					net = '-' + str("${:,}".format(abs(earning.net)))
 				total_payouts += abs(earning.net)
 			else:
-				net = str("${:,}".format(earning.net))
+				if game.decimal:
+					net = str("${:,.2f}".format(earning.net))
+				else:
+					net = str("${:,}".format(earning.net))
 
 			new_earnings.append({'net': earning.net, 'formatted_net' : net, 'player_id': earning.player_id, 'new_record' : earning.new_record})
 	new_payments = []
@@ -553,7 +562,8 @@ def payout():
 			if new_amount % 1 == 0:
 				new_amount = int(new_amount)
 			new_payments.append({'payer': payment.payer, 'payee' : payment.payee, 'amount' : new_amount})
-	return render_template("payout.html", user=current_user, payments=new_payments, players=players, game=game, earnings=new_earnings, total_payouts=total_payouts)
+	
+	return render_template("payout.html", user=current_user, payments=new_payments, players=players, game=game, earnings=new_earnings, total_payouts=total_payouts, total_buyins=total_buyins)
 
 
 @views.route('/games', methods=['GET','POST'])
