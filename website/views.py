@@ -310,15 +310,17 @@ def link_players():
             #        Filename='website/static/uploads/ledgers/ledger_'+game_id+'.csv',
             #        Key = 'ledgers/ledger_'+game_id+'.csv'
             #    )
-			if not isfile_s3('ledgers/ledger_'+game_id+'.csv'):
-				s3_resource = boto3.Session().resource('s3')
-				bucket = s3_resource.Bucket(BUCKET_NAME)
-				#bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
-				import io
-				bucket.upload_fileobj(io.BytesIO(r.content), 'ledgers/ledger_'+game_id+'.csv')
+			
+			#Don't really need to store things to AWS anymore
+			#if not isfile_s3('ledgers/ledger_'+game_id+'.csv'):
+			#	s3_resource = boto3.Session().resource('s3')
+			#	bucket = s3_resource.Bucket(BUCKET_NAME)
+			#	#bucket.upload_fileobj(r.raw, 'ledgers/ledger_'+game_id+'.csv')
+			#	import io
+			#	bucket.upload_fileobj(io.BytesIO(r.content), 'ledgers/ledger_'+game_id+'.csv')
 			r.raise_for_status()
 		except ClientError as e: #(RuntimeError, TypeError, NameError):
-			#print(ClientError)
+			print(e)
 			flash("There was an error loading importing the game.", category="error")
 			return render_template("import_game.html", user=current_user)
 		if r.status_code != 200:
