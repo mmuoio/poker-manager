@@ -323,8 +323,9 @@ def link_players():
 			print(e)
 			flash("There was an error loading importing the game.", category="error")
 			return render_template("import_game.html", user=current_user)
+		print(ledger_url)
 		if r.status_code != 200:
-			flash("There was an error loading importing the game2.", category="error")
+			flash("There was an error loading importing the game3.", category="error")
 			return render_template("import_game.html", user=current_user)
 	
 		#####################################
