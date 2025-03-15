@@ -321,11 +321,11 @@ def link_players():
 			r.raise_for_status()
 		except ClientError as e: #(RuntimeError, TypeError, NameError):
 			print(e)
-			flash("There was an error loading importing the game.", category="error")
+			flash("There was an error importing the game.", category="error")
 			return render_template("import_game.html", user=current_user)
 		print(ledger_url)
 		if r.status_code != 200:
-			flash("There was an error loading importing the game3.", category="error")
+			flash("PokerNow did not return a valid response. Try again later.", category="error")
 			return render_template("import_game.html", user=current_user)
 	
 		#####################################
