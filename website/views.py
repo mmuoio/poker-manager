@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, render_template, request, flash, redirect,
 from flask_paginate import Pagination, get_page_parameter
 from flask_login import login_required, current_user, AnonymousUserMixin
 from sqlalchemy import null, func, asc, desc
+from sqlalchemy.orm import selectinload
 from .models import Bankroll, Player, Alias, Game, Payment, Url, Earning, PokernowId, Behavior
 from . import db
 import json, requests, csv
@@ -577,14 +578,14 @@ def games():
 		search = True
 	page = request.args.get(get_page_parameter(), type=int, default=1)
 	
-	games = Game.query.order_by(Game.date.desc()).all()
-	game_page = Game.query.order_by(Game.date.desc()).paginate(page=page, per_page=15)
+	total_games = Game.query.count()
+	game_page = Game.query.options(selectinload(Game.urls)).order_by(Game.date.desc()).paginate(page=page, per_page=15)
 	#print(game_page)
 
-	pagination = Pagination(page=page, total=len(games), search=search, record_name='games', per_page=15)
+	pagination = Pagination(page=page, total=total_games, search=search, record_name='games', per_page=15)
 
 	urls = {}
-	for game in games:
+	for game in game_page.items:
 		for url in game.urls:
 			if game.id in urls.keys():
 				if url.imported == False:
