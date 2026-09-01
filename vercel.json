@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.py": {
+      "maxDuration": 10,
+      "excludeFiles": "{website/static/**/*.csv,website/static/auto-rabbit.zip,website/database.db,migrations/__pycache__/**,website/__pycache__/**,__pycache__/**}"
+    }
+  }
+}
